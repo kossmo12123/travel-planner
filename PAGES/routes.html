@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Маршруты - TravelHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <span class="logo-icon">✈</span>
+                    <span class="logo-text">TravelHub</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html" class="nav-link">Главная</a></li>
+                <li><a href="weather.html" class="nav-link">Погода</a></li>
+                <li><a href="attractions.html" class="nav-link">Места</a></li>
+                <li><a href="routes.html" class="nav-link active">Маршруты</a></li>
+                <li><a href="planner.html" class="nav-link">План</a></li>
+                <li><a href="forum.html" class="nav-link">Форум</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="main-content routes-page">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Построение маршрута</h1>
+                <p class="page-subtitle">Создайте оптимальный маршрут между точками</p>
+            </div>
+
+            <!-- Панель управления -->
+            <section class="route-controls">
+                <div class="route-builder">
+                    <h3 class="section-subtitle">Точки маршрута</h3>
+                    <div id="routePoints" class="route-points">
+                        <!-- Заполняется JavaScript -->
+                    </div>
+                    <div class="route-actions">
+                        <button class="btn btn-primary" id="addPointBtn">
+                            ➕ Добавить точку
+                        </button>
+                        <button class="btn btn-secondary" id="calculateRouteBtn" disabled>
+                            🗺️ Рассчитать маршрут
+                        </button>
+                        <button class="btn btn-outline" id="clearRouteBtn">
+                            🗑️ Очистить
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Информация о маршруте -->
+                <div id="routeInfo" class="route-info" style="display: none;">
+                    <h3 class="section-subtitle">Информация о маршруте</h3>
+                    <div class="route-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">📏</div>
+                            <div class="stat-data">
+                                <span class="stat-value" id="totalDistance">-</span>
+                                <span class="stat-label">Общая дистанция</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-data">
+                                <span class="stat-value" id="totalTime">-</span>
+                                <span class="stat-label">Время в пути</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📍</div>
+                            <div class="stat-data">
+                                <span class="stat-value" id="totalPoints">0</span>
+                                <span class="stat-label">Точек</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Визуализация маршрута -->
+            <section id="routeVisualization" class="route-visualization" style="display: none;">
+                <h3 class="section-subtitle">Визуализация маршрута</h3>
+                <div class="route-map">
+                    <div id="routeMapCanvas" class="route-canvas">
+                        <!-- Здесь будет SVG карта с точками и линиями -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Детали маршрута -->
+            <section id="routeDetails" class="route-details" style="display: none;">
+                <h3 class="section-subtitle">Детали маршрута</h3>
+                <div id="routeStepsList" class="route-steps-list">
+                    <!-- Заполняется JavaScript -->
+                </div>
+                <div class="route-save-section">
+                    <button class="btn btn-success" id="saveRouteBtn">
+                        💾 Сохранить маршрут
+                    </button>
+                    <button class="btn btn-primary" id="addRouteToPlannerBtn">
+                        📅 Добавить в планировщик
+                    </button>
+                </div>
+            </section>
+
+            <!-- Сохранённые маршруты -->
+            <section class="saved-routes">
+                <h3 class="section-subtitle">Сохранённые маршруты</h3>
+                <div id="savedRoutesList" class="saved-routes-list">
+                    <p class="empty-state">У вас пока нет сохранённых маршрутов</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Модальное окно добавления точки -->
+    <div id="addPointModal" class="modal">
+        <div class="modal-overlay" id="pointModalOverlay"></div>
+        <div class="modal-content modal-small">
+            <button class="modal-close" id="pointModalClose">&times;</button>
+            <div class="modal-body">
+                <h2 class="modal-title">Добавить точку маршрута</h2>
+                <form id="addPointForm">
+                    <div class="form-group">
+                        <label for="pointName">Название места</label>
+                        <input 
+                            type="text" 
+                            id="pointName" 
+                            class="form-input" 
+                            placeholder="Например: Эйфелева башня"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="pointCity">Город</label>
+                        <input 
+                            type="text" 
+                            id="pointCity" 
+                            class="form-input" 
+                            placeholder="Например: Париж"
+                            required
+                        >
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pointLat">Широта</label>
+                            <input 
+                                type="number" 
+                                id="pointLat" 
+                                class="form-input" 
+                                step="0.0001"
+                                placeholder="48.8584"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="pointLon">Долгота</label>
+                            <input 
+                                type="number" 
+                                id="pointLon" 
+                                class="form-input" 
+                                step="0.0001"
+                                placeholder="2.2945"
+                            >
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-outline" id="cancelPointBtn">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon">✈</span>
+                        <span class="logo-text">TravelHub</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 TravelHub</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/storage.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/routes.js"></script>
+</body>
+</html>

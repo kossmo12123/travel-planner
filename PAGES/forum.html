@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форум - TravelHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <span class="logo-icon">✈</span>
+                    <span class="logo-text">TravelHub</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html" class="nav-link">Главная</a></li>
+                <li><a href="weather.html" class="nav-link">Погода</a></li>
+                <li><a href="attractions.html" class="nav-link">Места</a></li>
+                <li><a href="routes.html" class="nav-link">Маршруты</a></li>
+                <li><a href="planner.html" class="nav-link">План</a></li>
+                <li><a href="forum.html" class="nav-link active">Форум</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="main-content forum-page">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Форум путешественников</h1>
+                <p class="page-subtitle">Делитесь опытом и советами с другими туристами</p>
+            </div>
+
+            <!-- Панель создания поста -->
+            <section class="create-post-section">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">👤</div>
+                    <div class="user-details">
+                        <input 
+                            type="text" 
+                            id="usernameInput" 
+                            class="username-input" 
+                            placeholder="Ваше имя"
+                            maxlength="30"
+                        >
+                        <span class="user-hint">Введите ваше имя для участия в форуме</span>
+                    </div>
+                </div>
+                <form id="createPostForm" class="create-post-form">
+                    <textarea 
+                        id="postContent" 
+                        class="post-textarea" 
+                        placeholder="Поделитесь вашим опытом путешествий..."
+                        rows="4"
+                        maxlength="500"
+                        required
+                    ></textarea>
+                    <div class="post-actions">
+                        <span class="char-counter">
+                            <span id="charCount">0</span> / 500
+                        </span>
+                        <button type="submit" class="btn btn-primary">
+                            📝 Опубликовать
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Фильтры -->
+            <section class="forum-filters">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="recent">
+                        🕒 Недавние
+                    </button>
+                    <button class="filter-tab" data-filter="popular">
+                        🔥 Популярные
+                    </button>
+                    <button class="filter-tab" data-filter="my">
+                        👤 Мои посты
+                    </button>
+                </div>
+                <div class="search-box-small">
+                    <input 
+                        type="text" 
+                        id="forumSearch" 
+                        class="search-input-small" 
+                        placeholder="Поиск по постам..."
+                    >
+                    <button class="search-btn-small">🔍</button>
+                </div>
+            </section>
+
+            <!-- Список постов -->
+            <section class="posts-section">
+                <div id="postsContainer" class="posts-container">
+                    <!-- Посты добавляются через JavaScript -->
+                </div>
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">💬</div>
+                    <p>Пока нет постов. Будьте первым!</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Модальное окно для просмотра поста и ответов -->
+    <div id="postModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-large">
+            <button class="modal-close" id="postModalClose">&times;</button>
+            <div class="modal-body">
+                <!-- Основной пост -->
+                <div id="modalPost" class="modal-post">
+                    <!-- Заполняется JavaScript -->
+                </div>
+
+                <!-- Комментарии -->
+                <div class="comments-section">
+                    <h3 class="comments-title">
+                        Ответы <span id="commentsCount">(0)</span>
+                    </h3>
+                    
+                    <!-- Форма добавления комментария -->
+                    <form id="addCommentForm" class="add-comment-form">
+                        <textarea 
+                            id="commentContent" 
+                            class="comment-textarea" 
+                            placeholder="Напишите ваш ответ..."
+                            rows="3"
+                            maxlength="300"
+                            required
+                        ></textarea>
+                        <div class="comment-actions">
+                            <span class="char-counter">
+                                <span id="commentCharCount">0</span> / 300
+                            </span>
+                            <button type="submit" class="btn btn-secondary">
+                                Ответить
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Список комментариев -->
+                    <div id="commentsList" class="comments-list">
+                        <!-- Комментарии добавляются через JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon">✈</span>
+                        <span class="logo-text">TravelHub</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 TravelHub. Форум работает через LocalStorage</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/storage.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/forum.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Планировщик - TravelHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <span class="logo-icon">✈</span>
+                    <span class="logo-text">TravelHub</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html" class="nav-link">Главная</a></li>
+                <li><a href="weather.html" class="nav-link">Погода</a></li>
+                <li><a href="attractions.html" class="nav-link">Места</a></li>
+                <li><a href="routes.html" class="nav-link">Маршруты</a></li>
+                <li><a href="planner.html" class="nav-link active">План</a></li>
+                <li><a href="forum.html" class="nav-link">Форум</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="main-content planner-page">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Планировщик путешествий</h1>
+                <p class="page-subtitle">Планируйте поездку день за днём</p>
+            </div>
+
+            <!-- Выбор / Создание поездки -->
+            <section class="trip-selector">
+                <div class="trip-controls">
+                    <button class="btn btn-primary" id="createTripBtn">
+                        ➕ Создать новую поездку
+                    </button>
+                    <div class="trip-dropdown">
+                        <label for="tripSelect">Выберите поездку:</label>
+                        <select id="tripSelect" class="trip-select">
+                            <option value="">-- Выберите поездку --</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Информация о текущей поездке -->
+            <section id="currentTripInfo" class="current-trip-info" style="display: none;">
+                <div class="trip-header">
+                    <div class="trip-main-info">
+                        <h2 id="tripTitle" class="trip-title"></h2>
+                        <p id="tripDates" class="trip-dates"></p>
+                        <p id="tripDestination" class="trip-destination"></p>
+                    </div>
+                    <div class="trip-actions">
+                        <button class="btn btn-outline" id="editTripBtn">✏️ Редактировать</button>
+                        <button class="btn btn-danger" id="deleteTripBtn">🗑️ Удалить</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Планирование по дням -->
+            <section id="dayPlanner" class="day-planner" style="display: none;">
+                <div class="planner-controls">
+                    <h3 class="section-subtitle">План по дням</h3>
+                    <button class="btn btn-secondary" id="addDayBtn">
+                        ➕ Добавить день
+                    </button>
+                </div>
+
+                <div id="daysList" class="days-list">
+                    <!-- Заполняется JavaScript -->
+                </div>
+            </section>
+
+            <!-- Сохранённые поездки -->
+            <section class="saved-trips">
+                <h3 class="section-subtitle">Все сохранённые поездки</h3>
+                <div id="savedTripsList" class="saved-trips-grid">
+                    <p class="empty-state">У вас пока нет сохранённых поездок. Создайте первую!</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Модальное окно создания поездки -->
+    <div id="createTripModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="createTripModalClose">&times;</button>
+            <div class="modal-body">
+                <h2 class="modal-title">Создать новую поездку</h2>
+                <form id="createTripForm">
+                    <div class="form-group">
+                        <label for="tripNameInput">Название поездки *</label>
+                        <input 
+                            type="text" 
+                            id="tripNameInput" 
+                            class="form-input" 
+                            placeholder="Например: Путешествие по Италии"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="tripDestinationInput">Направление *</label>
+                        <input 
+                            type="text" 
+                            id="tripDestinationInput" 
+                            class="form-input" 
+                            placeholder="Например: Рим, Флоренция, Венеция"
+                            required
+                        >
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tripStartDate">Дата начала *</label>
+                            <input 
+                                type="date" 
+                                id="tripStartDate" 
+                                class="form-input"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="tripEndDate">Дата окончания *</label>
+                            <input 
+                                type="date" 
+                                id="tripEndDate" 
+                                class="form-input"
+                                required
+                            >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="tripNotes">Заметки</label>
+                        <textarea 
+                            id="tripNotes" 
+                            class="form-textarea" 
+                            rows="3"
+                            placeholder="Дополнительная информация о поездке..."
+                        ></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                        <button type="button" class="btn btn-outline" id="cancelCreateTripBtn">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления активности -->
+    <div id="addActivityModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="addActivityModalClose">&times;</button>
+            <div class="modal-body">
+                <h2 class="modal-title">Добавить активность</h2>
+                <form id="addActivityForm">
+                    <input type="hidden" id="activityDayIndex">
+                    <div class="form-group">
+                        <label for="activityTime">Время</label>
+                        <input 
+                            type="time" 
+                            id="activityTime" 
+                            class="form-input"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="activityTitle">Название *</label>
+                        <input 
+                            type="text" 
+                            id="activityTitle" 
+                            class="form-input" 
+                            placeholder="Например: Посещение Колизея"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="activityDescription">Описание</label>
+                        <textarea 
+                            id="activityDescription" 
+                            class="form-textarea" 
+                            rows="3"
+                            placeholder="Детали активности..."
+                        ></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityLocation">Место</label>
+                        <input 
+                            type="text" 
+                            id="activityLocation" 
+                            class="form-input" 
+                            placeholder="Адрес или название места"
+                        >
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-outline" id="cancelActivityBtn">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon">✈</span>
+                        <span class="logo-text">TravelHub</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 TravelHub. Все данные сохраняются локально</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/storage.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/planner.js"></script>
+</body>
+</html>

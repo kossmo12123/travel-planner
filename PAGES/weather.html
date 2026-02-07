@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Погода - TravelHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <span class="logo-icon">✈</span>
+                    <span class="logo-text">TravelHub</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html" class="nav-link">Главная</a></li>
+                <li><a href="weather.html" class="nav-link active">Погода</a></li>
+                <li><a href="attractions.html" class="nav-link">Места</a></li>
+                <li><a href="routes.html" class="nav-link">Маршруты</a></li>
+                <li><a href="planner.html" class="nav-link">План</a></li>
+                <li><a href="forum.html" class="nav-link">Форум</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="main-content weather-page">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Прогноз погоды</h1>
+                <p class="page-subtitle">Узнайте погоду в любом городе мира</p>
+            </div>
+
+            <!-- Поиск города -->
+            <section class="search-section">
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="weatherCityInput" 
+                        class="search-input" 
+                        placeholder="Введите название города..."
+                        autocomplete="off"
+                    >
+                    <button class="search-button" id="weatherSearchBtn">
+                        🔍 Найти
+                    </button>
+                </div>
+                <div id="weatherSuggestions" class="search-suggestions"></div>
+            </section>
+
+            <!-- Загрузка -->
+            <div id="weatherLoading" class="loading-state" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Загружаем прогноз погоды...</p>
+            </div>
+
+            <!-- Ошибка -->
+            <div id="weatherError" class="error-state" style="display: none;">
+                <div class="error-icon">⚠️</div>
+                <p class="error-message"></p>
+            </div>
+
+            <!-- Текущая погода -->
+            <section id="currentWeather" class="current-weather" style="display: none;">
+                <div class="weather-card-main">
+                    <div class="weather-location">
+                        <h2 id="weatherCity"></h2>
+                        <p id="weatherDate"></p>
+                    </div>
+                    <div class="weather-main">
+                        <div class="weather-icon-large" id="weatherIcon"></div>
+                        <div class="weather-temp">
+                            <span class="temp-value" id="currentTemp"></span>
+                            <span class="temp-unit">°C</span>
+                        </div>
+                    </div>
+                    <div class="weather-description" id="weatherDescription"></div>
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Ощущается</span>
+                            <span class="detail-value" id="feelsLike"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Влажность</span>
+                            <span class="detail-value" id="humidity"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Ветер</span>
+                            <span class="detail-value" id="windSpeed"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Давление</span>
+                            <span class="detail-value" id="pressure"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Прогноз на 5 дней -->
+            <section id="forecastSection" class="forecast-section" style="display: none;">
+                <h2 class="section-title">Прогноз на 5 дней</h2>
+                <div class="forecast-grid" id="forecastGrid">
+                    <!-- Заполняется JavaScript -->
+                </div>
+            </section>
+
+            <!-- Быстрый доступ к популярным городам -->
+            <section class="quick-cities">
+                <h3 class="section-subtitle">Популярные города</h3>
+                <div class="quick-cities-grid">
+                    <button class="quick-city-btn" data-city="Алматы">Алматы</button>
+                    <button class="quick-city-btn" data-city="Астана">Астана</button>
+                    <button class="quick-city-btn" data-city="Москва">Москва</button>
+                    <button class="quick-city-btn" data-city="Лондон">Лондон</button>
+                    <button class="quick-city-btn" data-city="Париж">Париж</button>
+                    <button class="quick-city-btn" data-city="Токио">Токио</button>
+                    <button class="quick-city-btn" data-city="Дубай">Дубай</button>
+                    <button class="quick-city-btn" data-city="Стамбул">Стамбул</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon">✈</span>
+                        <span class="logo-text">TravelHub</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 TravelHub. Powered by OpenWeatherMap API</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/storage.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/weather.js"></script>
+</body>
+</html>
