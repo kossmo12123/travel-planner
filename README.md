@@ -41,10 +41,8 @@ travel-planner/
 ├── index.html                    
 ├── README.md                                        
 ├── css/
-
 │   └── style.css               
 ├── js/
-
 │   ├── storage.js              
 │   ├── api.js                   
 │   ├── app.js                   
@@ -54,7 +52,6 @@ travel-planner/
 │   ├── planner.js               
 │   └── forum.js                 
 └── pages/
-
     ├── weather.html             
     ├── attractions.html         
     ├── routes.html              
