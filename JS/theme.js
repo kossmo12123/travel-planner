@@ -4,40 +4,53 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
-    initThemeToggle();
+    createThemeToggle();
 });
 
 // Инициализация темы
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon(savedTheme);
-}
-
-// Переключатель темы
-function initThemeToggle() {
-    const themeToggle = document.getElementById('themeToggle');
-    if (!themeToggle) {
-        createThemeToggle();
-        return;
-    }
-
-    themeToggle.addEventListener('click', toggleTheme);
+    console.log('Тема установлена:', savedTheme);
 }
 
 // Создание кнопки переключения темы
 function createThemeToggle() {
-    const nav = document.querySelector('.nav-container');
-    if (!nav) return;
+    // Проверяем, не создана ли уже кнопка
+    if (document.getElementById('themeToggle')) {
+        console.log('Кнопка темы уже существует');
+        initThemeToggle();
+        return;
+    }
 
+    // Создаем кнопку
     const themeBtn = document.createElement('button');
     themeBtn.id = 'themeToggle';
     themeBtn.className = 'theme-toggle';
     themeBtn.setAttribute('aria-label', 'Переключить тему');
-    themeBtn.innerHTML = '🌙';
+    
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    themeBtn.innerHTML = currentTheme === 'light' ? '🌙' : '☀️';
 
-    nav.appendChild(themeBtn);
-    themeBtn.addEventListener('click', toggleTheme);
+    // Добавляем на страницу
+    document.body.appendChild(themeBtn);
+    
+    // Инициализируем
+    initThemeToggle();
+    
+    console.log('Кнопка темы создана');
+}
+
+// Инициализация переключателя темы
+function initThemeToggle() {
+    const themeToggle = document.getElementById('themeToggle');
+    if (!themeToggle) {
+        console.error('Кнопка темы не найдена');
+        return;
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
+    console.log('Переключатель темы инициализирован');
 }
 
 // Переключение темы
@@ -48,6 +61,8 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     updateThemeIcon(newTheme);
+    
+    console.log('Тема изменена на:', newTheme);
 }
 
 // Обновление иконки

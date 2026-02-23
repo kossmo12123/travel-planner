@@ -1,123 +1,250 @@
 /**
- * WEATHER.JS - Логика страницы погоды
+ * WEATHER.JS - Страница погоды
+ * ИСПРАВЛЕНО: правильная обработка ошибок
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initNavigation();
+    console.log('Инициализация страницы погоды');
+    
     initWeatherSearch();
     initQuickCities();
-    loadSavedCityWeather();
+    
+    // Загружаем погоду для последнего города
+    const lastCity = localStorage.getItem('lastWeatherCity');
+    if (lastCity) {
+        searchWeather(lastCity);
+    }
 });
 
-function initNavigation() {
-    const navToggle = document.getElementById('navToggle');
-    const navMenu = document.getElementById('navMenu');
-    
-    if (navToggle && navMenu) {
-        navToggle.addEventListener('click', () => navMenu.classList.toggle('active'));
-    }
-}
-
+// Инициализация поиска
 function initWeatherSearch() {
     const searchBtn = document.getElementById('weatherSearchBtn');
-    const input = document.getElementById('weatherCityInput');
+    const searchInput = document.getElementById('weatherCityInput');
     
-    if (searchBtn && input) {
-        searchBtn.addEventListener('click', () => searchWeather(input.value));
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchWeather(input.value);
-        });
+    if (!searchBtn || !searchInput) {
+        console.error('Элементы поиска не найдены');
+        return;
     }
+    
+    // Поиск по кнопке
+    searchBtn.addEventListener('click', () => {
+        const city = searchInput.value.trim();
+        if (city) {
+            searchWeather(city);
+        }
+    });
+    
+    // Поиск по Enter
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const city = searchInput.value.trim();
+            if (city) {
+                searchWeather(city);
+            }
+        }
+    });
+    
+    console.log('Поиск погоды инициализирован');
 }
 
+// Инициализация быстрых городов
 function initQuickCities() {
-    document.querySelectorAll('.quick-city-btn').forEach(btn => {
+    const quickCityBtns = document.querySelectorAll('.quick-city-btn');
+    
+    quickCityBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const city = btn.dataset.city;
-            document.getElementById('weatherCityInput').value = city;
-            searchWeather(city);
+            if (city) {
+                document.getElementById('weatherCityInput').value = city;
+                searchWeather(city);
+            }
         });
     });
+    
+    console.log('Быстрые города инициализированы');
 }
 
-async function searchWeather(city) {
-    if (!city.trim()) return;
+// Поиск погоды
+async function searchWeather(cityName) {
+    console.log('Поиск погоды для города:', cityName);
     
+    // Показываем загрузку
     showLoading();
     hideError();
     hideWeather();
     
     try {
-        const [current, forecast] = await Promise.all([
-            API.getCurrentWeather(city),
-            API.getWeatherForecast(city)
-        ]);
+        // Получаем координаты
+        const cities = await getCityCoordinates(cityName);
         
-        displayCurrentWeather(current);
+        if (!cities || cities.length === 0) {
+            throw new Error('Город не найден. Попробуйте другое название или проверьте правильность написания.');
+        }
+        
+        const city = cities[0];
+        console.log('Город найден:', city);
+        
+        // Получаем текущую погоду
+        const weather = await getCurrentWeather(city.lat, city.lon);
+        
+        // Получаем прогноз
+        const forecast = await getForecast(city.lat, city.lon);
+        
+        // Сохраняем последний город
+        localStorage.setItem('lastWeatherCity', cityName);
+        
+        // Отображаем погоду
+        displayCurrentWeather(weather, city);
         displayForecast(forecast);
-        Storage.saveCity({ name: city, lat: current.coordinates.lat, lon: current.coordinates.lon });
-    } catch (error) {
-        showError(error.message);
-    } finally {
+        
         hideLoading();
+        showWeather();
+        
+    } catch (error) {
+        console.error('Ошибка поиска погоды:', error);
+        hideLoading();
+        showError(error.message || 'Не удалось загрузить погоду. Проверьте название города и попробуйте снова.');
     }
 }
 
-function displayCurrentWeather(data) {
-    document.getElementById('weatherCity').textContent = `${data.city}, ${data.country}`;
-    document.getElementById('weatherDate').textContent = API.formatDate(data.timestamp);
-    document.getElementById('weatherIcon').textContent = data.icon;
-    document.getElementById('currentTemp').textContent = data.temp;
-    document.getElementById('weatherDescription').textContent = data.description;
-    document.getElementById('feelsLike').textContent = `${data.feelsLike}°C`;
-    document.getElementById('humidity').textContent = `${data.humidity}%`;
-    document.getElementById('windSpeed').textContent = `${data.windSpeed} км/ч`;
-    document.getElementById('pressure').textContent = `${data.pressure} гПа`;
+// Отображение текущей погоды
+function displayCurrentWeather(weather, city) {
+    // Название города и дата
+    document.getElementById('weatherCity').textContent = `${city.name}, ${city.country || ''}`;
+    document.getElementById('weatherDate').textContent = new Date().toLocaleDateString('ru-RU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+    });
     
-    document.getElementById('currentWeather').style.display = 'block';
+    // Иконка и температура
+    document.getElementById('weatherIcon').textContent = getWeatherIcon(weather.weather[0].icon);
+    document.getElementById('currentTemp').textContent = Math.round(weather.main.temp);
+    
+    // Описание
+    document.getElementById('weatherDescription').textContent = weather.weather[0].description;
+    
+    // Детали
+    document.getElementById('feelsLike').textContent = `${Math.round(weather.main.feels_like)}°C`;
+    document.getElementById('humidity').textContent = `${weather.main.humidity}%`;
+    document.getElementById('windSpeed').textContent = `${Math.round(weather.wind.speed)} м/с`;
+    document.getElementById('pressure').textContent = `${weather.main.pressure} гПа`;
+    
+    console.log('Текущая погода отображена');
 }
 
-function displayForecast(data) {
-    const grid = document.getElementById('forecastGrid');
-    grid.innerHTML = data.forecast.map(day => `
-        <div class="forecast-card">
-            <div class="forecast-date">${API.formatShortDate(day.date)}</div>
-            <div class="forecast-icon">${day.icon}</div>
-            <div class="forecast-temp">${day.tempMax}° / ${day.tempMin}°</div>
-            <div class="forecast-desc">${day.description}</div>
-        </div>
-    `).join('');
+// Отображение прогноза
+function displayForecast(forecast) {
+    const forecastGrid = document.getElementById('forecastGrid');
     
-    document.getElementById('forecastSection').style.display = 'block';
-}
-
-function loadSavedCityWeather() {
-    const saved = Storage.getCity();
-    if (saved) {
-        document.getElementById('weatherCityInput').value = saved.name;
-        searchWeather(saved.name);
+    if (!forecastGrid) {
+        console.error('Элемент прогноза не найден');
+        return;
     }
+    
+    forecastGrid.innerHTML = '';
+    
+    // Группируем прогноз по дням
+    const dailyForecasts = {};
+    
+    forecast.list.forEach(item => {
+        const date = new Date(item.dt * 1000);
+        const dateKey = date.toDateString();
+        
+        if (!dailyForecasts[dateKey]) {
+            dailyForecasts[dateKey] = {
+                date: date,
+                temps: [],
+                weather: item.weather[0],
+                humidity: item.main.humidity
+            };
+        }
+        
+        dailyForecasts[dateKey].temps.push(item.main.temp);
+    });
+    
+    // Берем только 5 дней
+    const days = Object.values(dailyForecasts).slice(0, 5);
+    
+    days.forEach(day => {
+        const minTemp = Math.round(Math.min(...day.temps));
+        const maxTemp = Math.round(Math.max(...day.temps));
+        
+        const card = document.createElement('div');
+        card.className = 'forecast-card';
+        card.innerHTML = `
+            <div class="forecast-date">${formatDate(day.date.getTime() / 1000)}</div>
+            <div class="forecast-icon">${getWeatherIcon(day.weather.icon)}</div>
+            <div class="forecast-temp">${maxTemp}° / ${minTemp}°</div>
+            <div class="forecast-desc">${day.weather.description}</div>
+        `;
+        
+        forecastGrid.appendChild(card);
+    });
+    
+    console.log('Прогноз отображен');
 }
 
+// Показать загрузку
 function showLoading() {
-    document.getElementById('weatherLoading').style.display = 'block';
+    const loading = document.getElementById('weatherLoading');
+    if (loading) {
+        loading.style.display = 'block';
+    }
 }
 
+// Скрыть загрузку
 function hideLoading() {
-    document.getElementById('weatherLoading').style.display = 'none';
+    const loading = document.getElementById('weatherLoading');
+    if (loading) {
+        loading.style.display = 'none';
+    }
 }
 
-function showError(msg) {
-    const errorEl = document.getElementById('weatherError');
-    errorEl.querySelector('.error-message').textContent = msg;
-    errorEl.style.display = 'block';
+// Показать ошибку
+function showError(message) {
+    const error = document.getElementById('weatherError');
+    if (error) {
+        const errorMessage = error.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.textContent = message;
+        }
+        error.style.display = 'block';
+    }
 }
 
+// Скрыть ошибку
 function hideError() {
-    document.getElementById('weatherError').style.display = 'none';
+    const error = document.getElementById('weatherError');
+    if (error) {
+        error.style.display = 'none';
+    }
 }
 
+// Показать погоду
+function showWeather() {
+    const currentWeather = document.getElementById('currentWeather');
+    const forecastSection = document.getElementById('forecastSection');
+    
+    if (currentWeather) {
+        currentWeather.style.display = 'block';
+    }
+    
+    if (forecastSection) {
+        forecastSection.style.display = 'block';
+    }
+}
+
+// Скрыть погоду
 function hideWeather() {
-    document.getElementById('currentWeather').style.display = 'none';
-    document.getElementById('forecastSection').style.display = 'none';
+    const currentWeather = document.getElementById('currentWeather');
+    const forecastSection = document.getElementById('forecastSection');
+    
+    if (currentWeather) {
+        currentWeather.style.display = 'none';
+    }
+    
+    if (forecastSection) {
+        forecastSection.style.display = 'none';
+    }
 }

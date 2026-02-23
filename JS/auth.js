@@ -1,37 +1,51 @@
 /**
  * AUTH.JS - Авторизация и регистрация
+ * ИСПРАВЛЕНО: окно больше не исчезает
  */
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    // ИСПРАВЛЕНИЕ: Проверяем авторизацию только если НЕ на странице auth.html
+    console.log('Страница загружена');
+    
+    // Проверяем, находимся ли мы на странице auth.html
     const isAuthPage = window.location.pathname.includes('auth.html');
     
-    if (!isAuthPage) {
-        // Если не на странице входа, проверяем авторизацию
-        checkAuth();
-    } else {
-        // Если НА странице входа, инициализируем формы
+    if (isAuthPage) {
+        console.log('Инициализация страницы авторизации');
+        // На странице авторизации - инициализируем формы
         initAuthPage();
+    } else {
+        console.log('Не страница авторизации');
+        // На других страницах - проверяем авторизацию для защищенных страниц
+        checkAuthForProtectedPages();
     }
 });
 
 // Инициализация страницы авторизации
 function initAuthPage() {
-    console.log('Инициализация страницы авторизации');
-    
-    // Проверка: если уже авторизован, редирект на профиль
-    const token = localStorage.getItem('token');
-    if (token) {
-        console.log('Пользователь уже авторизован, редирект на профиль');
-        window.location.href = 'profile.html';
-        return;
-    }
+    // НЕ проверяем авторизацию на странице входа!
+    // Просто инициализируем формы
     
     initAuthTabs();
     initLoginForm();
     initRegisterForm();
     initDemoLogin();
+    
+    console.log('Страница авторизации инициализирована');
+}
+
+// Проверка авторизации только для защищенных страниц
+function checkAuthForProtectedPages() {
+    const protectedPages = ['profile.html'];
+    const currentPage = window.location.pathname.split('/').pop();
+    
+    if (protectedPages.includes(currentPage)) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.log('Нет токена, редирект на auth.html');
+            window.location.href = 'auth.html';
+        }
+    }
 }
 
 // Переключение между табами (вход/регистрация)
@@ -39,9 +53,15 @@ function initAuthTabs() {
     const tabs = document.querySelectorAll('.auth-tab');
     const forms = document.querySelectorAll('.auth-form-container');
 
+    if (!tabs.length || !forms.length) {
+        console.error('Табы или формы не найдены');
+        return;
+    }
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const targetTab = tab.dataset.tab;
+            console.log('Переключение на таб:', targetTab);
 
             // Убираем active со всех табов
             tabs.forEach(t => t.classList.remove('active'));
@@ -55,15 +75,21 @@ function initAuthTabs() {
             }
         });
     });
+
+    console.log('Табы инициализированы');
 }
 
 // Форма входа
 function initLoginForm() {
     const form = document.getElementById('loginFormElement');
-    if (!form) return;
+    if (!form) {
+        console.error('Форма входа не найдена');
+        return;
+    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('Попытка входа');
 
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
@@ -91,7 +117,8 @@ function initLoginForm() {
                 localStorage.setItem('userName', data.user.name);
                 localStorage.setItem('userEmail', data.user.email);
 
-                showMessage('loginMessage', 'Вход выполнен успешно!', 'success');
+                showMessage('loginMessage', 'Вход выполнен успешно! Перенаправление...', 'success');
+                console.log('Вход успешен');
 
                 // Редирект через 1 секунду
                 setTimeout(() => {
@@ -99,21 +126,28 @@ function initLoginForm() {
                 }, 1000);
             } else {
                 showMessage('loginMessage', data.message || 'Ошибка входа', 'error');
+                console.error('Ошибка входа:', data.message);
             }
         } catch (error) {
-            console.error('Ошибка:', error);
-            showMessage('loginMessage', 'Не удалось подключиться к серверу. Используйте демо-вход.', 'error');
+            console.error('Ошибка подключения:', error);
+            showMessage('loginMessage', 'Не удалось подключиться к серверу. Попробуйте демо-вход или проверьте, запущен ли сервер (npm start).', 'error');
         }
     });
+
+    console.log('Форма входа инициализирована');
 }
 
 // Форма регистрации
 function initRegisterForm() {
     const form = document.getElementById('registerFormElement');
-    if (!form) return;
+    if (!form) {
+        console.error('Форма регистрации не найдена');
+        return;
+    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('Попытка регистрации');
 
         const name = document.getElementById('registerName').value.trim();
         const email = document.getElementById('registerEmail').value.trim();
@@ -147,7 +181,8 @@ function initRegisterForm() {
             const data = await response.json();
 
             if (response.ok) {
-                showMessage('registerMessage', 'Регистрация успешна! Войдите в систему.', 'success');
+                showMessage('registerMessage', 'Регистрация успешна! Теперь войдите в систему.', 'success');
+                console.log('Регистрация успешна');
 
                 // Очистка формы
                 form.reset();
@@ -155,61 +190,65 @@ function initRegisterForm() {
                 // Переключение на форму входа через 2 секунды
                 setTimeout(() => {
                     const loginTab = document.querySelector('.auth-tab[data-tab="login"]');
-                    if (loginTab) loginTab.click();
-                    
-                    // Заполняем email в форме входа
-                    document.getElementById('loginEmail').value = email;
+                    if (loginTab) {
+                        loginTab.click();
+                        // Заполняем email в форме входа
+                        document.getElementById('loginEmail').value = email;
+                    }
                 }, 2000);
             } else {
                 showMessage('registerMessage', data.message || 'Ошибка регистрации', 'error');
+                console.error('Ошибка регистрации:', data.message);
             }
         } catch (error) {
-            console.error('Ошибка:', error);
-            showMessage('registerMessage', 'Не удалось подключиться к серверу', 'error');
+            console.error('Ошибка подключения:', error);
+            showMessage('registerMessage', 'Не удалось подключиться к серверу. Проверьте, запущен ли сервер (npm start).', 'error');
         }
     });
+
+    console.log('Форма регистрации инициализирована');
 }
 
 // Демо-вход (без сервера)
 function initDemoLogin() {
     const demoBtn = document.getElementById('demoLoginBtn');
-    if (!demoBtn) return;
+    if (!demoBtn) {
+        console.error('Кнопка демо-входа не найдена');
+        return;
+    }
 
     demoBtn.addEventListener('click', () => {
+        console.log('Демо-вход');
+        
         // Сохраняем демо-данные
-        localStorage.setItem('token', 'demo_token');
+        localStorage.setItem('token', 'demo_token_' + Date.now());
         localStorage.setItem('userId', 'demo_user');
         localStorage.setItem('userName', 'Демо Пользователь');
         localStorage.setItem('userEmail', 'demo@maply.com');
 
-        showMessage('loginMessage', 'Демо-вход выполнен!', 'success');
+        showMessage('loginMessage', 'Демо-вход выполнен! Перенаправление...', 'success');
 
         setTimeout(() => {
             window.location.href = 'profile.html';
         }, 1000);
     });
-}
 
-// Проверка авторизации (для других страниц)
-function checkAuth() {
-    const token = localStorage.getItem('token');
-    const protectedPages = ['profile.html'];
-    const currentPage = window.location.pathname.split('/').pop();
-
-    if (protectedPages.includes(currentPage) && !token) {
-        // Если на защищённой странице без токена - редирект на вход
-        window.location.href = 'auth.html';
-    }
+    console.log('Демо-вход инициализирован');
 }
 
 // Показать сообщение
 function showMessage(elementId, message, type) {
     const messageEl = document.getElementById(elementId);
-    if (!messageEl) return;
+    if (!messageEl) {
+        console.error('Элемент сообщения не найден:', elementId);
+        return;
+    }
 
     messageEl.textContent = message;
     messageEl.className = `auth-message ${type}`;
     messageEl.style.display = 'block';
+
+    console.log(`Сообщение (${type}):`, message);
 
     // Скрыть через 5 секунд
     setTimeout(() => {
