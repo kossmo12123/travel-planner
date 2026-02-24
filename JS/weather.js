@@ -1,6 +1,6 @@
 /**
  * WEATHER.JS - Страница погоды
- * ИСПРАВЛЕНО: правильная обработка ошибок
+ * ОБНОВЛЕНО для работы с WeatherAPI.com
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -74,27 +74,17 @@ async function searchWeather(cityName) {
     hideWeather();
     
     try {
-        // Получаем координаты
-        const cities = await getCityCoordinates(cityName);
-        
-        if (!cities || cities.length === 0) {
-            throw new Error('Город не найден. Попробуйте другое название или проверьте правильность написания.');
-        }
-        
-        const city = cities[0];
-        console.log('Город найден:', city);
-        
-        // Получаем текущую погоду
-        const weather = await getCurrentWeather(city.lat, city.lon);
+        // Получаем текущую погоду напрямую по названию города
+        const weather = await getCurrentWeather(0, 0, cityName);
         
         // Получаем прогноз
-        const forecast = await getForecast(city.lat, city.lon);
+        const forecast = await getForecast(0, 0, cityName);
         
         // Сохраняем последний город
         localStorage.setItem('lastWeatherCity', cityName);
         
         // Отображаем погоду
-        displayCurrentWeather(weather, city);
+        displayCurrentWeather(weather);
         displayForecast(forecast);
         
         hideLoading();
@@ -108,9 +98,9 @@ async function searchWeather(cityName) {
 }
 
 // Отображение текущей погоды
-function displayCurrentWeather(weather, city) {
+function displayCurrentWeather(weather) {
     // Название города и дата
-    document.getElementById('weatherCity').textContent = `${city.name}, ${city.country || ''}`;
+    document.getElementById('weatherCity').textContent = `${weather.name}, ${weather.sys.country || ''}`;
     document.getElementById('weatherDate').textContent = new Date().toLocaleDateString('ru-RU', {
         weekday: 'long',
         day: 'numeric',

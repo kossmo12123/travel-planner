@@ -1,5 +1,5 @@
 /**
- * SERVER.JS - Backend сервер для TravelHub
+ * SERVER.JS - Backend сервер для Maply
  */
 
 const express = require('express');
@@ -265,7 +265,7 @@ app.post('/api/user/avatar', authMiddleware, upload.single('avatar'), async (req
 app.listen(PORT, () => {
     console.log(`
 ╔════════════════════════════════════════╗
-║     TravelHub Server запущен!         ║
+║     Maply Server запущен!         ║
 ╠════════════════════════════════════════╣
 ║  Порт: ${PORT}                        ║
 ║  URL: http://localhost:${PORT}         ║
