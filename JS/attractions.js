@@ -1,418 +1,153 @@
-/**
- * ATTRACTIONS.JS - Страница достопримечательностей
- * ИСПРАВЛЕНО: правильная обработка ошибок
- */
-
-let currentPlaces = [];
-let currentFilter = 'all';
+let map, markers = [], currentPlaces = [], currentCity = null;
+const GEOAPIFY_KEY = '1b035ed69883433f82fa85d9af18576b';
+const GEOAPIFY_TILES_KEY = '519fc5c1a543431c87e378e370da1571';
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Инициализация страницы достопримечательностей');
-    
-    initAttractionsSearch();
-    initFilters();
-    
-    // Загружаем места для последнего города
-    const lastCity = localStorage.getItem('lastAttractionsCity');
-    if (lastCity) {
-        searchAttractions(lastCity);
-    }
+    initMap();
+    document.getElementById('attractionsSearchBtn').addEventListener('click', () => {
+        const city = document.getElementById('attractionsCityInput').value.trim();
+        if (city) searchAttractions(city);
+    });
+    document.getElementById('attractionsCityInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') document.getElementById('attractionsSearchBtn').click();
+    });
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('active'); b.classList.add('map-btn-secondary'); });
+            btn.classList.add('active'); btn.classList.remove('map-btn-secondary');
+            filterPlaces(btn.dataset.filter);
+        });
+    });
 });
 
-// Инициализация поиска
-function initAttractionsSearch() {
-    const searchBtn = document.getElementById('attractionsSearchBtn');
-    const searchInput = document.getElementById('attractionsCityInput');
-    
-    if (!searchBtn || !searchInput) {
-        console.error('Элементы поиска не найдены');
-        return;
-    }
-    
-    // Поиск по кнопке
-    searchBtn.addEventListener('click', () => {
-        const city = searchInput.value.trim();
-        if (city) {
-            searchAttractions(city);
-        }
-    });
-    
-    // Поиск по Enter
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const city = searchInput.value.trim();
-            if (city) {
-                searchAttractions(city);
-            }
-        }
-    });
-    
-    console.log('Поиск достопримечательностей инициализирован');
+function initMap() {
+    map = L.map('attractionsMap').setView([48.8566, 2.3522], 13);
+    L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_TILES_KEY}`, { maxZoom: 20 }).addTo(map);
+    setTimeout(() => map.invalidateSize(), 100);
 }
 
-// Инициализация фильтров
-function initFilters() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Убираем active у всех
-            filterBtns.forEach(b => b.classList.remove('active'));
-            
-            // Добавляем active к нажатой
-            btn.classList.add('active');
-            
-            // Применяем фильтр
-            const filter = btn.dataset.filter;
-            currentFilter = filter;
-            applyFilter(filter);
-        });
-    });
-    
-    console.log('Фильтры инициализированы');
-}
-
-// Поиск достопримечательностей
-async function searchAttractions(cityName) {
-    console.log('Поиск достопримечательностей для города:', cityName);
-    
-    // Показываем загрузку
-    showLoading();
-    hideError();
-    hideResults();
+async function searchAttractions(city) {
+    document.getElementById('attractionsLoading').style.display = 'block';
+    document.getElementById('attractionsError').style.display = 'none';
+    document.getElementById('attractionsResults').style.display = 'none';
     
     try {
-        // Получаем координаты
-        const city = await getPlacesCoordinates(cityName);
+        const geocodeUrl = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(city)}&apiKey=${GEOAPIFY_KEY}`;
+        const geocodeData = await (await fetch(geocodeUrl)).json();
+        if (!geocodeData.features || geocodeData.features.length === 0) throw new Error('Город не найден');
         
-        console.log('Координаты получены:', city);
+        const location = geocodeData.features[0];
+        const lat = location.properties.lat, lon = location.properties.lon;
+        currentCity = location.properties.city || location.properties.name;
+        map.setView([lat, lon], 13);
         
-        // Получаем места (радиус 10 км)
-        const places = await getPlaces(city.lat, city.lon, 10000);
+        const placesUrl = `https://api.geoapify.com/v2/places?categories=tourism,entertainment,leisure&filter=circle:${lon},${lat},5000&limit=50&apiKey=${GEOAPIFY_KEY}`;
+        const placesData = await (await fetch(placesUrl)).json();
+        if (!placesData.features || placesData.features.length === 0) throw new Error('Места не найдены');
         
-        if (!places || places.length === 0) {
-            throw new Error('Достопримечательности не найдены в этом городе. Попробуйте другой город.');
-        }
+        currentPlaces = placesData.features.map(f => ({
+            id: f.properties.place_id, name: f.properties.name || f.properties.address_line1 || 'Место',
+            lat: f.properties.lat, lon: f.properties.lon, categories: f.properties.categories || [],
+            address: f.properties.formatted || f.properties.address_line1 || 'Адрес не указан',
+            city: f.properties.city || currentCity, country: f.properties.country || '', datasource: f.properties.datasource || {}
+        }));
         
-        currentPlaces = places;
-        
-        // Сохраняем последний город
-        localStorage.setItem('lastAttractionsCity', cityName);
-        
-        // Отображаем результаты
-        displayResults(places, cityName);
-        
-        hideLoading();
-        showResults();
-        
+        displayPlaces(currentPlaces);
+        document.getElementById('attractionsLoading').style.display = 'none';
+        document.getElementById('attractionsResults').style.display = 'block';
     } catch (error) {
-        console.error('Ошибка поиска достопримечательностей:', error);
-        hideLoading();
-        showError(error.message || 'Не удалось загрузить достопримечательности. Проверьте название города и попробуйте снова.');
+        document.getElementById('attractionsLoading').style.display = 'none';
+        document.getElementById('attractionsError').style.display = 'block';
+        document.querySelector('.error-message').textContent = error.message;
     }
 }
 
-// Применить фильтр
-function applyFilter(filter) {
-    console.log('Применение фильтра:', filter);
+function displayPlaces(places) {
+    markers.forEach(m => map.removeLayer(m)); markers = [];
+    document.getElementById('resultsTitle').textContent = `Найдено в городе ${currentCity}`;
+    document.getElementById('resultsCount').textContent = `${places.length} мест`;
     
-    let filteredPlaces = currentPlaces;
-    
-    if (filter !== 'all') {
-        // Карта фильтров к категориям OpenTripMap
-        const filterMap = {
-            'museums': ['museums'],
-            'monuments': ['monuments_and_memorials'],
-            'churches': ['churches', 'religion'],
-            'parks': ['parks', 'gardens'],
-            'theatres': ['theatres', 'cinemas'],
-            'architecture': ['architecture'],
-            'cultural': ['cultural']
-        };
-        
-        const categories = filterMap[filter] || [];
-        
-        filteredPlaces = currentPlaces.filter(place => {
-            if (!place.kinds) return false;
-            
-            const kindsLower = place.kinds.toLowerCase();
-            return categories.some(cat => kindsLower.includes(cat));
-        });
-    }
-    
-    // Отображаем отфильтрованные места
-    const cityName = document.getElementById('resultsTitle')?.textContent.replace('Достопримечательности в ', '') || 'городе';
-    displayResults(filteredPlaces, cityName);
-}
-
-// Отображение результатов
-function displayResults(places, cityName) {
-    const resultsTitle = document.getElementById('resultsTitle');
-    const resultsCount = document.getElementById('resultsCount');
-    const attractionsGrid = document.getElementById('attractionsGrid');
-    
-    if (!attractionsGrid) {
-        console.error('Элемент результатов не найден');
-        return;
-    }
-    
-    // Обновляем заголовок
-    if (resultsTitle) {
-        resultsTitle.textContent = `Достопримечательности в ${cityName}`;
-    }
-    
-    if (resultsCount) {
-        resultsCount.textContent = `Найдено: ${places.length} мест`;
-    }
-    
-    // Очищаем grid
-    attractionsGrid.innerHTML = '';
-    
-    if (places.length === 0) {
-        attractionsGrid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-                <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
-                <h3>Ничего не найдено</h3>
-                <p>Попробуйте выбрать другой фильтр или город</p>
+    const list = document.getElementById('placesList');
+    list.innerHTML = places.map(place => {
+        const icon = getPlaceIcon(place.categories);
+        const category = translateCategories(place.categories);
+        return `<div class="place-item" onclick='showPlaceDetails(${JSON.stringify(place).replace(/'/g, "&apos;")})'>
+            <div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+                <span class="place-item-icon">${icon}</span>
+                <div style="flex: 1;">
+                    <div class="place-item-title">${place.name}</div>
+                    <span class="place-item-category">${category}</span>
+                </div>
             </div>
-        `;
-        return;
-    }
+            <div class="place-item-address">📍 ${place.address}</div>
+        </div>`;
+    }).join('');
     
-    // Отображаем карточки
     places.forEach(place => {
-        const card = createAttractionCard(place);
-        attractionsGrid.appendChild(card);
+        const marker = L.marker([place.lat, place.lon], {
+            icon: L.divIcon({ html: `<div style="font-size: 2rem;">${getPlaceIcon(place.categories)}</div>`, className: 'custom-marker', iconSize: [40, 40] })
+        }).addTo(map);
+        marker.on('click', () => showPlaceDetails(place));
+        marker.bindPopup(`<strong>${place.name}</strong><br>${translateCategories(place.categories)}`);
+        markers.push(marker);
     });
-    
-    console.log('Результаты отображены:', places.length);
 }
 
-// Создание карточки достопримечательности
-function createAttractionCard(place) {
-    const card = document.createElement('div');
-    card.className = 'attraction-card';
-    
-    const icon = getPlaceIcon(place.kinds);
-    const kinds = translateKinds(place.kinds);
-    const distance = place.dist ? `${Math.round(place.dist)} м` : '';
-    
-    card.innerHTML = `
-        <div class="attraction-image">
-            ${icon}
-        </div>
-        <div class="attraction-content">
-            <h3 class="attraction-title">${place.name || 'Без названия'}</h3>
-            <div class="attraction-kinds">
-                <span class="kind-badge">${kinds}</span>
-            </div>
-            ${distance ? `<p class="attraction-distance">📍 ${distance} от центра</p>` : ''}
-        </div>
-    `;
-    
-    // Клик по карточке
-    card.addEventListener('click', () => {
-        if (place.xid) {
-            showPlaceDetails(place.xid);
-        }
-    });
-    
-    return card;
+function filterPlaces(filter) {
+    if (filter === 'all') { displayPlaces(currentPlaces); return; }
+    const filterMap = { museums: 'museum', monuments: 'monument', churches: 'religion', parks: 'park', theatres: 'theatre' };
+    const filtered = currentPlaces.filter(place => place.categories.some(cat => cat.includes(filterMap[filter])));
+    displayPlaces(filtered);
 }
 
-// Показать детали места
-async function showPlaceDetails(xid) {
-    console.log('Загрузка деталей места:', xid);
+function showPlaceDetails(place) {
+    document.getElementById('placeIcon').textContent = getPlaceIcon(place.categories);
+    document.getElementById('placeTitle').textContent = place.name;
+    document.getElementById('placeKinds').innerHTML = `<span style="background: var(--gradient-primary); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-full); font-size: 0.875rem;">${translateCategories(place.categories)}</span>`;
+    document.getElementById('placeAddress').textContent = place.address;
+    document.getElementById('placeCoords').textContent = `${place.lat.toFixed(6)}, ${place.lon.toFixed(6)}`;
     
-    try {
-        const details = await getPlaceDetails(xid);
-        
-        // Создаем модальное окно если его нет
-        let modal = document.getElementById('attractionModal');
-        if (!modal) {
-            modal = createModal();
-        }
-        
-        // Заполняем модальное окно
-        fillModal(details);
-        
-        // Показываем модальное окно
-        modal.classList.add('active');
-        
-    } catch (error) {
-        console.error('Ошибка загрузки деталей:', error);
-        alert('Не удалось загрузить детали места');
-    }
-}
-
-// Создание модального окна
-function createModal() {
-    const modal = document.createElement('div');
-    modal.id = 'attractionModal';
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <div class="modal-body">
-                <div id="modalImage" class="modal-image"></div>
-                <h2 id="modalTitle" class="modal-title"></h2>
-                <div id="modalKinds" class="modal-kinds"></div>
-                <p id="modalDescription" class="modal-description"></p>
-                <div class="modal-details">
-                    <div class="modal-detail-item">
-                        <span class="detail-label">📍 Адрес:</span>
-                        <span id="modalAddress" class="detail-value"></span>
-                    </div>
-                    <div class="modal-detail-item">
-                        <span class="detail-label">🌐 Координаты:</span>
-                        <span id="modalCoords" class="detail-value"></span>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button id="addToRoute" class="btn btn-primary">
-                        🗺️ Добавить в маршрут
-                    </button>
-                    <button id="addToPlanner" class="btn btn-secondary">
-                        📅 Добавить в план
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
+    let description = 'Информация о месте недоступна.';
+    if (place.datasource && place.datasource.raw && place.datasource.raw.description) description = place.datasource.raw.description;
+    else description = `${place.name} находится по адресу: ${place.address}`;
+    document.getElementById('placeDescription').textContent = description;
     
-    document.body.appendChild(modal);
+    map.setView([place.lat, place.lon], 15);
+    document.getElementById('placeModal').style.display = 'flex';
     
-    // Закрытие модального окна
-    const closeBtn = modal.querySelector('.modal-close');
-    const overlay = modal.querySelector('.modal-overlay');
-    
-    closeBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-    });
-    
-    overlay.addEventListener('click', () => {
-        modal.classList.remove('active');
-    });
-    
-    return modal;
-}
-
-// Заполнение модального окна
-function fillModal(details) {
-    const icon = getPlaceIcon(details.kinds);
-    const kinds = translateKinds(details.kinds);
-    
-    document.getElementById('modalImage').textContent = icon;
-    document.getElementById('modalTitle').textContent = details.name || 'Без названия';
-    
-    const kindsEl = document.getElementById('modalKinds');
-    kindsEl.innerHTML = `<span class="kind-badge">${kinds}</span>`;
-    
-    const description = details.wikipedia_extracts?.text || details.info?.descr || 'Описание недоступно';
-    document.getElementById('modalDescription').textContent = description;
-    
-    const address = details.address?.road || details.address?.city || 'Адрес не указан';
-    document.getElementById('modalAddress').textContent = address;
-    
-    const coords = `${details.point?.lat.toFixed(6)}, ${details.point?.lon.toFixed(6)}`;
-    document.getElementById('modalCoords').textContent = coords;
-    
-    // Обработчики кнопок
-    document.getElementById('addToRoute').onclick = () => {
-        addToRoute(details);
+    document.getElementById('addToRouteBtn').onclick = () => {
+        let routes = JSON.parse(localStorage.getItem('routes') || '[]');
+        routes.push({ name: place.name, lat: place.lat, lon: place.lon, address: place.address });
+        localStorage.setItem('routes', JSON.stringify(routes));
+        closeModal(); alert('✅ Место добавлено в маршрут!');
     };
     
-    document.getElementById('addToPlanner').onclick = () => {
-        addToPlanner(details);
+    document.getElementById('addToPlannerBtn').onclick = () => {
+        let planner = JSON.parse(localStorage.getItem('planner') || '[]');
+        planner.push({ name: place.name, lat: place.lat, lon: place.lon, address: place.address });
+        localStorage.setItem('planner', JSON.stringify(planner));
+        closeModal(); alert('✅ Место добавлено в план!');
     };
 }
 
-// Добавить в маршрут
-function addToRoute(place) {
-    console.log('Добавление в маршрут:', place.name);
-    
-    // Сохраняем в localStorage
-    let routes = JSON.parse(localStorage.getItem('routes') || '[]');
-    
-    routes.push({
-        name: place.name,
-        lat: place.point.lat,
-        lon: place.point.lon,
-        address: place.address?.road || place.address?.city || ''
-    });
-    
-    localStorage.setItem('routes', JSON.stringify(routes));
-    
-    alert(`"${place.name}" добавлено в маршрут!`);
+window.closeModal = function() { document.getElementById('placeModal').style.display = 'none'; };
+
+function getPlaceIcon(categories) {
+    if (!categories || categories.length === 0) return '📍';
+    const cats = categories.join(',').toLowerCase();
+    if (cats.includes('museum')) return '🏛️';
+    if (cats.includes('religion') || cats.includes('church')) return '⛪';
+    if (cats.includes('monument')) return '🗿';
+    if (cats.includes('park') || cats.includes('garden')) return '🌳';
+    if (cats.includes('theatre') || cats.includes('cinema')) return '🎭';
+    if (cats.includes('castle')) return '🏰';
+    if (cats.includes('tower')) return '🗼';
+    return '📍';
 }
 
-// Добавить в планировщик
-function addToPlanner(place) {
-    console.log('Добавление в планировщик:', place.name);
-    
-    // Сохраняем в localStorage
-    let planner = JSON.parse(localStorage.getItem('planner') || '[]');
-    
-    planner.push({
-        name: place.name,
-        description: place.wikipedia_extracts?.text || place.info?.descr || '',
-        location: place.address?.road || place.address?.city || ''
-    });
-    
-    localStorage.setItem('planner', JSON.stringify(planner));
-    
-    alert(`"${place.name}" добавлено в план поездки!`);
-}
-
-// Показать загрузку
-function showLoading() {
-    const loading = document.getElementById('attractionsLoading');
-    if (loading) {
-        loading.style.display = 'block';
-    }
-}
-
-// Скрыть загрузку
-function hideLoading() {
-    const loading = document.getElementById('attractionsLoading');
-    if (loading) {
-        loading.style.display = 'none';
-    }
-}
-
-// Показать ошибку
-function showError(message) {
-    const error = document.getElementById('attractionsError');
-    if (error) {
-        const errorMessage = error.querySelector('.error-message');
-        if (errorMessage) {
-            errorMessage.textContent = message;
-        }
-        error.style.display = 'block';
-    }
-}
-
-// Скрыть ошибку
-function hideError() {
-    const error = document.getElementById('attractionsError');
-    if (error) {
-        error.style.display = 'none';
-    }
-}
-
-// Показать результаты
-function showResults() {
-    const results = document.getElementById('attractionsResults');
-    if (results) {
-        results.style.display = 'block';
-    }
-}
-
-// Скрыть результаты
-function hideResults() {
-    const results = document.getElementById('attractionsResults');
-    if (results) {
-        results.style.display = 'none';
-    }
+function translateCategories(categories) {
+    if (!categories || categories.length === 0) return 'Достопримечательность';
+    const translations = { tourism: 'Туризм', museum: 'Музей', monument: 'Памятник', religion: 'Религия', church: 'Храм', park: 'Парк', garden: 'Сад', theatre: 'Театр', cinema: 'Кинотеатр', entertainment: 'Развлечения', leisure: 'Отдых', attraction: 'Достопримечательность', culture: 'Культура' };
+    const translated = categories.map(cat => { const parts = cat.split('.'); for (let part of parts) if (translations[part]) return translations[part]; return null; }).filter(Boolean);
+    return translated.slice(0, 3).join(', ') || 'Интересное место';
 }

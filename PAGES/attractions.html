@@ -3,182 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Достопримечательности - Maply</title>
-    
-    <!-- Шрифты -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Места - Maply</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <!-- Стили -->
     <link rel="stylesheet" href="../css/style-new.css">
+    <style>
+        .places-grid { display: grid; grid-template-columns: 1fr 400px; gap: 2rem; margin-top: 2rem; }
+        .places-list { display: flex; flex-direction: column; gap: 1rem; max-height: 600px; overflow-y: auto; }
+        .place-item { padding: 1.5rem; background: var(--bg-primary); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); cursor: pointer; transition: all var(--transition); border: 2px solid transparent; }
+        .place-item:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--accent-primary); }
+        .place-item-icon { font-size: 2rem; margin-right: 1rem; }
+        .place-item-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .place-item-category { display: inline-block; padding: 0.25rem 0.75rem; background: var(--gradient-primary); color: white; border-radius: var(--radius-full); font-size: 0.75rem; margin-bottom: 0.5rem; }
+        .map-container { position: sticky; top: 8rem; height: 600px; }
+        #attractionsMap { width: 100%; height: 100%; border-radius: var(--radius-lg); }
+        @media (max-width: 1024px) { .places-grid { grid-template-columns: 1fr; } .map-container { position: relative; top: 0; height: 400px; order: -1; }}
+    </style>
 </head>
 <body>
+    <nav class="floating-nav"><div class="nav-island">
+        <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></a>
+        <a href="weather.html" class="nav-item"><span class="nav-icon">🌤️</span><span class="nav-label">Погода</span></a>
+        <a href="attractions.html" class="nav-item active"><span class="nav-icon">🗺️</span><span class="nav-label">Места</span></a>
+        <a href="routes.html" class="nav-item"><span class="nav-icon">🧭</span><span class="nav-label">Маршруты</span></a>
+        <a href="planner.html" class="nav-item"><span class="nav-icon">📅</span><span class="nav-label">План</span></a>
+        <a href="forum.html" class="nav-item"><span class="nav-icon">💬</span><span class="nav-label">Форум</span></a>
+        <a href="about.html" class="nav-item"><span class="nav-icon">ℹ️</span><span class="nav-label">О нас</span></a>
+        <a href="auth.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></a>
+        <button class="nav-item theme-toggle-btn" id="themeToggle"><span class="nav-icon">🌙</span><span class="nav-label">Тема</span></button>
+    </div></nav>
     
-    <!-- Плавающая навигация -->
-    <nav class="floating-nav" id="floatingNav">
-        <div class="nav-island">
-            <a href="../index.html" class="nav-item">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-label">Главная</span>
-            </a>
-            <a href="weather.html" class="nav-item">
-                <span class="nav-icon">🌤️</span>
-                <span class="nav-label">Погода</span>
-            </a>
-            <a href="attractions.html" class="nav-item active">
-                <span class="nav-icon">🗺️</span>
-                <span class="nav-label">Места</span>
-            </a>
-            <a href="routes.html" class="nav-item">
-                <span class="nav-icon">🧭</span>
-                <span class="nav-label">Маршруты</span>
-            </a>
-            <a href="planner.html" class="nav-item">
-                <span class="nav-icon">📅</span>
-                <span class="nav-label">План</span>
-            </a>
-            <a href="forum.html" class="nav-item">
-                <span class="nav-icon">💬</span>
-                <span class="nav-label">Форум</span>
-            </a>
-            <a href="about.html" class="nav-item">
-                <span class="nav-icon">ℹ️</span>
-                <span class="nav-label">О нас</span>
-            </a>
-            <a href="auth.html" class="nav-item">
-                <span class="nav-icon">👤</span>
-                <span class="nav-label">Профиль</span>
-            </a>
-            <button class="nav-item theme-toggle-btn" id="themeToggle">
-                <span class="nav-icon">🌙</span>
-                <span class="nav-label">Тема</span>
-            </button>
+    <section class="page-section" style="padding-top: 8rem;"><div class="container">
+        <div class="section-header"><h1 class="section-title">Достопримечательности</h1><p class="section-subtitle">Исследуйте интересные места</p></div>
+        <div class="map-controls">
+            <input type="text" id="attractionsCityInput" class="map-search" placeholder="Введите город...">
+            <button id="attractionsSearchBtn" class="map-btn">🔍 Найти места</button>
         </div>
-    </nav>
-
-    <!-- Основной контент -->
-    <section class="page-section" style="padding-top: 8rem;">
-        <div class="container">
-            <div class="section-header">
-                <h1 class="section-title">Достопримечательности</h1>
-                <p class="section-subtitle">Исследуйте интересные места на интерактивной карте</p>
-            </div>
-
-            <!-- Поиск города -->
-            <div class="map-controls">
-                <input 
-                    type="text" 
-                    id="attractionsCityInput" 
-                    class="map-search" 
-                    placeholder="Введите город..."
-                >
-                <button id="attractionsSearchBtn" class="map-btn">
-                    🔍 Найти места
-                </button>
-            </div>
-
-            <!-- Фильтры -->
-            <div class="map-controls">
-                <button class="filter-btn map-btn map-btn-secondary active" data-filter="all">🌟 Все</button>
-                <button class="filter-btn map-btn map-btn-secondary" data-filter="museums">🏛️ Музеи</button>
-                <button class="filter-btn map-btn map-btn-secondary" data-filter="monuments">🗿 Памятники</button>
-                <button class="filter-btn map-btn map-btn-secondary" data-filter="churches">⛪ Храмы</button>
-                <button class="filter-btn map-btn map-btn-secondary" data-filter="parks">🌳 Парки</button>
-                <button class="filter-btn map-btn map-btn-secondary" data-filter="theatres">🎭 Театры</button>
-            </div>
-
-            <!-- Загрузка -->
-            <div id="attractionsLoading" style="display: none; text-align: center; padding: 3rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-                <p style="color: var(--text-secondary);">Загрузка мест...</p>
-            </div>
-
-            <!-- Ошибка -->
-            <div id="attractionsError" style="display: none; padding: 2rem; background: rgba(244, 67, 54, 0.1); border-radius: var(--radius-lg); text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
-                <p class="error-message" style="color: #f44336; font-weight: 600;"></p>
-            </div>
-
-            <!-- Карта -->
-            <div id="attractionsMap" style="display: none;"></div>
-
-            <!-- Результаты -->
-            <div id="attractionsResults" style="display: none; margin-top: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h3 id="resultsTitle" style="font-size: 1.75rem;"></h3>
-                    <p id="resultsCount" style="color: var(--text-secondary);"></p>
-                </div>
-                <div id="attractionsGrid" class="features-grid"></div>
-            </div>
+        <div class="map-controls">
+            <button class="filter-btn map-btn map-btn-secondary active" data-filter="all">🌟 Все</button>
+            <button class="filter-btn map-btn map-btn-secondary" data-filter="museums">🏛️ Музеи</button>
+            <button class="filter-btn map-btn map-btn-secondary" data-filter="monuments">🗿 Памятники</button>
+            <button class="filter-btn map-btn map-btn-secondary" data-filter="churches">⛪ Храмы</button>
+            <button class="filter-btn map-btn map-btn-secondary" data-filter="parks">🌳 Парки</button>
+            <button class="filter-btn map-btn map-btn-secondary" data-filter="theatres">🎭 Театры</button>
         </div>
-    </section>
-
-    <!-- Модальное окно с деталями -->
-    <div id="placeModal" class="modal" style="display: none;">
-        <div class="modal-overlay"></div>
-        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
-            <button class="modal-close" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; background: none; border: none; cursor: pointer; color: var(--text-secondary);">&times;</button>
-            <div class="modal-body">
-                <div id="placeIcon" style="font-size: 4rem; text-align: center; margin-bottom: 1rem;"></div>
-                <h2 id="placeTitle" style="text-align: center; margin-bottom: 1rem;"></h2>
-                <div id="placeKinds" style="text-align: center; margin-bottom: 2rem;"></div>
-                <div id="placeDescription" style="margin-bottom: 2rem; line-height: 1.8;"></div>
-                
-                <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
-                    <h4 style="margin-bottom: 1rem;">📍 Местоположение</h4>
-                    <p><strong>Адрес:</strong> <span id="placeAddress"></span></p>
-                    <p><strong>Координаты:</strong> <span id="placeCoords"></span></p>
-                </div>
-
-                <div class="map-controls">
-                    <button id="addToRouteBtn" class="map-btn">🧭 Добавить в маршрут</button>
-                    <button id="addToPlannerBtn" class="map-btn map-btn-secondary">📅 Добавить в план</button>
-                </div>
+        <div id="attractionsLoading" style="display: none; text-align: center; padding: 3rem;"><div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div><p style="color: var(--text-secondary);">Загрузка мест...</p></div>
+        <div id="attractionsError" style="display: none; padding: 2rem; background: rgba(244, 67, 54, 0.1); border-radius: var(--radius-lg); text-align: center;"><div style="font-size: 3rem; margin-bottom: 1rem;">❌</div><p class="error-message" style="color: #f44336; font-weight: 600;"></p></div>
+        <div id="attractionsResults" style="display: none;">
+            <div style="margin-bottom: 2rem;"><h3 id="resultsTitle" style="font-size: 1.75rem; margin-bottom: 0.5rem;"></h3><p id="resultsCount" style="color: var(--text-secondary);"></p></div>
+            <div class="places-grid"><div class="places-list" id="placesList"></div><div class="map-container"><div id="attractionsMap"></div></div></div>
+        </div>
+    </div></section>
+    
+    <div id="placeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; align-items: center; justify-content: center;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);" onclick="window.closeModal && closeModal()"></div>
+        <div style="position: relative; background: var(--bg-primary); border-radius: var(--radius-xl); padding: 2.5rem; box-shadow: var(--shadow-xl); z-index: 10001; max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <button onclick="window.closeModal && closeModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; background: none; border: none; cursor: pointer; color: var(--text-secondary);">&times;</button>
+            <div id="placeIcon" style="font-size: 4rem; text-align: center; margin-bottom: 1rem;"></div>
+            <h2 id="placeTitle" style="text-align: center; margin-bottom: 1rem;"></h2>
+            <div id="placeKinds" style="text-align: center; margin-bottom: 2rem;"></div>
+            <div id="placeDescription" style="margin-bottom: 2rem; line-height: 1.8;"></div>
+            <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                <h4 style="margin-bottom: 1rem;">📍 Местоположение</h4>
+                <p><strong>Адрес:</strong> <span id="placeAddress"></span></p>
+                <p><strong>Координаты:</strong> <span id="placeCoords"></span></p>
+            </div>
+            <div class="map-controls">
+                <button id="addToRouteBtn" class="map-btn">🧭 Добавить в маршрут</button>
+                <button id="addToPlannerBtn" class="map-btn map-btn-secondary">📅 Добавить в план</button>
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <span class="logo-icon">🗺️</span>
-                        <span class="logo-text">Maply</span>
-                    </div>
-                    <p class="footer-text">Ваш надёжный спутник в путешествиях</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Навигация</h4>
-                    <ul>
-                        <li><a href="weather.html">Погода</a></li>
-                        <li><a href="attractions.html">Места</a></li>
-                        <li><a href="routes.html">Маршруты</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Информация</h4>
-                    <ul>
-                        <li><a href="about.html">О нас</a></li>
-                        <li><a href="forum.html">Форум</a></li>
-                        <li><a href="auth.html">Войти</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Maply. Создано с ❤️</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Скрипты -->
+    
+    <footer class="footer"><div class="container"><div class="footer-content">
+        <div class="footer-brand"><div class="footer-logo"><span class="logo-icon">🗺️</span><span class="logo-text">Maply</span></div><p class="footer-text">Ваш надёжный спутник в путешествиях</p></div>
+        <div class="footer-links"><h4>Навигация</h4><ul><li><a href="weather.html">Погода</a></li><li><a href="attractions.html">Места</a></li><li><a href="routes.html">Маршруты</a></li></ul></div>
+        <div class="footer-links"><h4>Информация</h4><ul><li><a href="about.html">О нас</a></li><li><a href="forum.html">Форум</a></li><li><a href="auth.html">Войти</a></li></ul></div>
+    </div><div class="footer-bottom"><p>&copy; 2026 Maply. Создано с ❤️</p></div></div></footer>
+    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="../js/api.js"></script>
     <script src="../js/theme-new.js"></script>
     <script src="../js/theme-OLD.js"></script>
     <script src="../js/attractions.js"></script>

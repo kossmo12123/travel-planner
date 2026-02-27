@@ -4,164 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Планировщик - Maply</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="../css/style-new.css">
 </head>
 <body>
+    <nav class="floating-nav"><div class="nav-island">
+        <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></a>
+        <a href="weather.html" class="nav-item"><span class="nav-icon">🌤️</span><span class="nav-label">Погода</span></a>
+        <a href="attractions.html" class="nav-item"><span class="nav-icon">🗺️</span><span class="nav-label">Места</span></a>
+        <a href="routes.html" class="nav-item"><span class="nav-icon">🧭</span><span class="nav-label">Маршруты</span></a>
+        <a href="planner.html" class="nav-item active"><span class="nav-icon">📅</span><span class="nav-label">План</span></a>
+        <a href="forum.html" class="nav-item"><span class="nav-icon">💬</span><span class="nav-label">Форум</span></a>
+        <a href="about.html" class="nav-item"><span class="nav-icon">ℹ️</span><span class="nav-label">О нас</span></a>
+        <a href="auth.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">Профиль</span></a>
+        <button class="nav-item theme-toggle-btn" id="themeToggle"><span class="nav-icon">🌙</span><span class="nav-label">Тема</span></button>
+    </div></nav>
     
-    <nav class="floating-nav">
-        <div class="nav-island">
-            <a href="../index.html" class="nav-item">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-label">Главная</span>
-            </a>
-            <a href="weather.html" class="nav-item">
-                <span class="nav-icon">🌤️</span>
-                <span class="nav-label">Погода</span>
-            </a>
-            <a href="attractions.html" class="nav-item">
-                <span class="nav-icon">🗺️</span>
-                <span class="nav-label">Места</span>
-            </a>
-            <a href="routes.html" class="nav-item">
-                <span class="nav-icon">🧭</span>
-                <span class="nav-label">Маршруты</span>
-            </a>
-            <a href="planner.html" class="nav-item active">
-                <span class="nav-icon">📅</span>
-                <span class="nav-label">План</span>
-            </a>
-            <a href="forum.html" class="nav-item">
-                <span class="nav-icon">💬</span>
-                <span class="nav-label">Форум</span>
-            </a>
-            <a href="about.html" class="nav-item">
-                <span class="nav-icon">ℹ️</span>
-                <span class="nav-label">О нас</span>
-            </a>
-            <a href="auth.html" class="nav-item">
-                <span class="nav-icon">👤</span>
-                <span class="nav-label">Профиль</span>
-            </a>
-            <button class="nav-item theme-toggle-btn" id="themeToggle">
-                <span class="nav-icon">🌙</span>
-                <span class="nav-label">Тема</span>
-            </button>
+    <section class="page-section" style="padding-top: 8rem;"><div class="container">
+        <div class="section-header"><h1 class="section-title">Планировщик поездок</h1><p class="section-subtitle">Организуйте своё путешествие</p></div>
+        <div class="map-controls"><button id="createTripBtn" class="map-btn">➕ Создать поездку</button></div>
+        <h3 style="font-size: 1.75rem; margin-bottom: 1.5rem;">📅 Ваши поездки</h3>
+        <div class="features-grid" id="tripsGrid"></div>
+    </div></section>
+    
+    <div id="tripModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; align-items: center; justify-content: center;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7);" onclick="document.getElementById('tripModal').style.display='none'"></div>
+        <div style="position: relative; background: var(--bg-primary); border-radius: var(--radius-xl); padding: 2.5rem; box-shadow: var(--shadow-xl); z-index: 10001; max-width: 500px; width: 90%;">
+            <h2 style="margin-bottom: 2rem;">Новая поездка</h2>
+            <form id="tripForm">
+                <div style="margin-bottom: 1.5rem;"><label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Название поездки</label>
+                <input type="text" id="tripName" class="map-search" style="width: 100%;" required></div>
+                <div style="margin-bottom: 1.5rem;"><label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Дата начала</label>
+                <input type="date" id="tripStart" class="map-search" style="width: 100%;" required></div>
+                <div style="margin-bottom: 1.5rem;"><label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Дата окончания</label>
+                <input type="date" id="tripEnd" class="map-search" style="width: 100%;" required></div>
+                <div style="margin-bottom: 1.5rem;"><label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Бюджет ($)</label>
+                <input type="number" id="tripBudget" class="map-search" style="width: 100%;" min="0" step="100" required></div>
+                <div class="map-controls"><button type="button" class="map-btn map-btn-secondary" style="flex: 1;" onclick="document.getElementById('tripModal').style.display='none'">Отмена</button>
+                <button type="submit" class="map-btn" style="flex: 1;">Создать</button></div>
+            </form>
         </div>
-    </nav>
-
-    <section class="page-section" style="padding-top: 8rem;">
-        <div class="container">
-            <div class="section-header">
-                <h1 class="section-title">Планировщик поездок</h1>
-                <p class="section-subtitle">Организуйте своё путешествие</p>
-            </div>
-
-            <div class="map-controls" style="margin-bottom: 3rem;">
-                <button class="map-btn">➕ Создать поездку</button>
-            </div>
-
-            <h3 style="font-size: 1.75rem; margin-bottom: 1.5rem;">📅 Ваши поездки</h3>
-
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <h3 class="feature-title" style="margin: 0;">Путешествие в Париж</h3>
-                        <span style="padding: 0.25rem 0.75rem; background: var(--gradient-primary); color: white; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600;">Запланировано</span>
-                    </div>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">15 - 25 марта 2026</p>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
-                        <div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Дней</div>
-                            <div style="font-weight: 700;">10</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Бюджет</div>
-                            <div style="font-weight: 700;">$2000</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Активностей</div>
-                            <div style="font-weight: 700;">12</div>
-                        </div>
-                    </div>
-                    <div class="map-controls">
-                        <button class="map-btn map-btn-secondary" style="flex: 1;">👁️ Просмотр</button>
-                        <button class="map-btn" style="flex: 1;">✏️ Редактировать</button>
-                    </div>
-                </div>
-
-                <div class="feature-card">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <h3 class="feature-title" style="margin: 0;">Токио и Киото</h3>
-                        <span style="padding: 0.25rem 0.75rem; background: var(--bg-tertiary); color: var(--text-primary); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600;">Черновик</span>
-                    </div>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Дата не выбрана</p>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
-                        <div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Дней</div>
-                            <div style="font-weight: 700;">14</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Бюджет</div>
-                            <div style="font-weight: 700;">$3500</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);">Активностей</div>
-                            <div style="font-weight: 700;">8</div>
-                        </div>
-                    </div>
-                    <div class="map-controls">
-                        <button class="map-btn map-btn-secondary" style="flex: 1;">👁️ Просмотр</button>
-                        <button class="map-btn" style="flex: 1;">✏️ Редактировать</button>
-                    </div>
-                </div>
-
-                <div class="feature-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px; border: 2px dashed var(--text-tertiary); background: transparent; cursor: pointer;" onclick="alert('Создание новой поездки')">
-                    <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">➕</div>
-                    <div style="font-weight: 600; color: var(--text-secondary);">Создать новую поездку</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <span class="logo-icon">🗺️</span>
-                        <span class="logo-text">Maply</span>
-                    </div>
-                    <p class="footer-text">Ваш надёжный спутник в путешествиях</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Навигация</h4>
-                    <ul>
-                        <li><a href="weather.html">Погода</a></li>
-                        <li><a href="attractions.html">Места</a></li>
-                        <li><a href="routes.html">Маршруты</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Информация</h4>
-                    <ul>
-                        <li><a href="about.html">О нас</a></li>
-                        <li><a href="forum.html">Форум</a></li>
-                        <li><a href="auth.html">Войти</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Maply. Создано с ❤️</p>
-            </div>
-        </div>
-    </footer>
-
+    </div>
+    
+    <footer class="footer"><div class="container"><div class="footer-content">
+        <div class="footer-brand"><div class="footer-logo"><span class="logo-icon">🗺️</span><span class="logo-text">Maply</span></div><p class="footer-text">Ваш надёжный спутник в путешествиях</p></div>
+        <div class="footer-links"><h4>Навигация</h4><ul><li><a href="weather.html">Погода</a></li><li><a href="attractions.html">Места</a></li><li><a href="routes.html">Маршруты</a></li></ul></div>
+        <div class="footer-links"><h4>Информация</h4><ul><li><a href="about.html">О нас</a></li><li><a href="forum.html">Форум</a></li><li><a href="auth.html">Войти</a></li></ul></div>
+    </div><div class="footer-bottom"><p>&copy; 2026 Maply. Создано с ❤️</p></div></div></footer>
+    
     <script src="../js/theme-new.js"></script>
     <script src="../js/theme-OLD.js"></script>
+    <script src="../js/planner.js"></script>
 </body>
 </html>
