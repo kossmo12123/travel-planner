@@ -3,203 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход / Регистрация - Maply</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <title>Вход - Maply</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../css/style-new.css">
 </head>
 <body>
-    <header class="header">
-        <nav class="nav-container">
-            <div class="logo">
-                <a href="../index.html">
-                    <span class="logo-icon">✈</span>
-                    <span class="logo-text">Maply</span>
-                </a>
-            </div>
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="../index.html" class="nav-link">Главная</a></li>
-                <li><a href="weather.html" class="nav-link">Погода</a></li>
-                <li><a href="attractions.html" class="nav-link">Места</a></li>
-                <li><a href="routes.html" class="nav-link">Маршруты</a></li>
-                <li><a href="planner.html" class="nav-link">План</a></li>
-                <li><a href="forum.html" class="nav-link">Форум</a></li>
-                <li><a href="about.html" class="nav-link">О нас</a></li>
-                <li><a href="profile.html" class="nav-link">👤</a></li>
-                <li><a href="auth.html" class="nav-link active">Вход</a></li>
-            </ul>
-            <button class="nav-toggle" id="navToggle">
-                <span></span>
-                <span></span>
-                <span></span>
+    
+    <nav class="floating-nav">
+        <div class="nav-island">
+            <a href="../index.html" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Главная</span>
+            </a>
+            <a href="weather.html" class="nav-item">
+                <span class="nav-icon">🌤️</span>
+                <span class="nav-label">Погода</span>
+            </a>
+            <a href="attractions.html" class="nav-item">
+                <span class="nav-icon">🗺️</span>
+                <span class="nav-label">Места</span>
+            </a>
+            <a href="routes.html" class="nav-item">
+                <span class="nav-icon">🧭</span>
+                <span class="nav-label">Маршруты</span>
+            </a>
+            <a href="planner.html" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">План</span>
+            </a>
+            <a href="forum.html" class="nav-item">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Форум</span>
+            </a>
+            <a href="about.html" class="nav-item">
+                <span class="nav-icon">ℹ️</span>
+                <span class="nav-label">О нас</span>
+            </a>
+            <a href="auth.html" class="nav-item active">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Профиль</span>
+            </a>
+            <button class="nav-item theme-toggle-btn" id="themeToggle">
+                <span class="nav-icon">🌙</span>
+                <span class="nav-label">Тема</span>
             </button>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
-    <main class="main-content auth-page">
-        <div class="auth-container">
-            <div class="auth-wrapper">
-                <!-- Табы -->
-                <div class="auth-tabs">
-                    <button class="auth-tab active" data-tab="login">Вход</button>
-                    <button class="auth-tab" data-tab="register">Регистрация</button>
+    <section class="page-section" style="padding-top: 8rem; min-height: 100vh; display: flex; align-items: center;">
+        <div class="container">
+            <div class="feature-card" style="max-width: 500px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">👤</div>
+                    <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Добро пожаловать!</h1>
+                    <p style="color: var(--text-secondary);">Войдите или зарегистрируйтесь</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="auth-tab map-btn active" data-tab="login" style="flex: 1;">Вход</button>
+                    <button class="auth-tab map-btn map-btn-secondary" data-tab="register" style="flex: 1;">Регистрация</button>
                 </div>
 
                 <!-- Форма входа -->
-                <div class="auth-form-container active" id="loginForm">
-                    <h2 class="auth-title">Добро пожаловать!</h2>
-                    <p class="auth-subtitle">Войдите в свой аккаунт</p>
-
-                    <form id="loginFormElement" class="auth-form">
-                        <div class="form-group">
-                            <label for="loginEmail">Email</label>
-                            <input 
-                                type="email" 
-                                id="loginEmail" 
-                                class="form-input" 
-                                placeholder="example@email.com"
-                                required
-                            >
+                <div id="loginForm" class="auth-form-container active">
+                    <form id="loginFormElement">
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+                            <input type="email" id="loginEmail" class="map-search" style="width: 100%;" placeholder="your@email.com" required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="loginPassword">Пароль</label>
-                            <input 
-                                type="password" 
-                                id="loginPassword" 
-                                class="form-input" 
-                                placeholder="Введите пароль"
-                                required
-                            >
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Пароль</label>
+                            <input type="password" id="loginPassword" class="map-search" style="width: 100%;" placeholder="••••••••" required>
                         </div>
-
-                        <div class="form-group-checkbox">
-                            <input type="checkbox" id="rememberMe">
-                            <label for="rememberMe">Запомнить меня</label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-full">
-                            Войти
-                        </button>
-
-                        <div class="auth-divider">или</div>
-
-                        <button type="button" class="btn btn-outline btn-full" id="demoLoginBtn">
-                            🚀 Демо-вход (без регистрации)
-                        </button>
+                        <div id="loginMessage" style="display: none; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;"></div>
+                        <button type="submit" class="map-btn" style="width: 100%; margin-bottom: 1rem;">Войти</button>
+                        <button type="button" id="demoLoginBtn" class="map-btn map-btn-secondary" style="width: 100%;">Демо-вход (без сервера)</button>
                     </form>
-
-                    <div id="loginMessage" class="auth-message"></div>
                 </div>
 
                 <!-- Форма регистрации -->
-                <div class="auth-form-container" id="registerForm">
-                    <h2 class="auth-title">Создать аккаунт</h2>
-                    <p class="auth-subtitle">Присоединяйтесь к Maply</p>
-
-                    <form id="registerFormElement" class="auth-form">
-                        <div class="form-group">
-                            <label for="registerName">Имя</label>
-                            <input 
-                                type="text" 
-                                id="registerName" 
-                                class="form-input" 
-                                placeholder="Ваше имя"
-                                required
-                                minlength="2"
-                            >
+                <div id="registerForm" class="auth-form-container" style="display: none;">
+                    <form id="registerFormElement">
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Имя</label>
+                            <input type="text" id="registerName" class="map-search" style="width: 100%;" placeholder="Иван Иванов" required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="registerEmail">Email</label>
-                            <input 
-                                type="email" 
-                                id="registerEmail" 
-                                class="form-input" 
-                                placeholder="example@email.com"
-                                required
-                            >
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+                            <input type="email" id="registerEmail" class="map-search" style="width: 100%;" placeholder="your@email.com" required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="registerPassword">Пароль</label>
-                            <input 
-                                type="password" 
-                                id="registerPassword" 
-                                class="form-input" 
-                                placeholder="Минимум 6 символов"
-                                required
-                                minlength="6"
-                            >
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Пароль</label>
+                            <input type="password" id="registerPassword" class="map-search" style="width: 100%;" placeholder="••••••••" required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="registerPasswordConfirm">Подтвердите пароль</label>
-                            <input 
-                                type="password" 
-                                id="registerPasswordConfirm" 
-                                class="form-input" 
-                                placeholder="Повторите пароль"
-                                required
-                            >
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Подтверждение пароля</label>
+                            <input type="password" id="registerPasswordConfirm" class="map-search" style="width: 100%;" placeholder="••••••••" required>
                         </div>
-
-                        <div class="form-group-checkbox">
-                            <input type="checkbox" id="agreeTerms" required>
-                            <label for="agreeTerms">Я согласен с условиями использования</label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-full">
-                            Зарегистрироваться
-                        </button>
+                        <div id="registerMessage" style="display: none; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;"></div>
+                        <button type="submit" class="map-btn" style="width: 100%;">Зарегистрироваться</button>
                     </form>
-
-                    <div id="registerMessage" class="auth-message"></div>
-                </div>
-
-                <!-- Информационный блок -->
-                <div class="auth-info">
-                    <div class="auth-features">
-                        <div class="auth-feature">
-                            <div class="feature-icon">✈️</div>
-                            <h4>Планируйте поездки</h4>
-                            <p>Создавайте детальные планы путешествий</p>
-                        </div>
-                        <div class="auth-feature">
-                            <div class="feature-icon">💾</div>
-                            <h4>Сохраняйте прогресс</h4>
-                            <p>Все данные доступны на любом устройстве</p>
-                        </div>
-                        <div class="auth-feature">
-                            <div class="feature-icon">💬</div>
-                            <h4>Общайтесь</h4>
-                            <p>Делитесь опытом на форуме</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
-    </main>
+    </section>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="logo">
-                        <span class="logo-icon">✈</span>
-                        <span class="logo-text">Maply</span>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Maply. Все данные защищены</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="../js/storage.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/auth.js"></script>
+    <script src="../js/theme-new.js"></script>
+    <script src="../js/theme-OLD.js"></script>
 </body>
 </html>

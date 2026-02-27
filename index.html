@@ -3,214 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maply - Планируйте путешествия мечты</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Maply - Ваш путеводитель по миру</title>
+    
+    <!-- Шрифты -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet для карт -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Swiper для слайдера -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="css/style-new.css">
 </head>
 <body>
-    <!-- Навигация -->
-    <header class="header">
-        <nav class="nav-container">
-            <div class="logo">
-                <span class="logo-icon">✈</span>
-                <span class="logo-text">Maply</span>
-            </div>
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="index.html" class="nav-link active">Главная</a></li>
-                <li><a href="pages/weather.html" class="nav-link">Погода</a></li>
-                <li><a href="pages/attractions.html" class="nav-link">Места</a></li>
-                <li><a href="pages/routes.html" class="nav-link">Маршруты</a></li>
-                <li><a href="pages/planner.html" class="nav-link">План</a></li>
-                <li><a href="pages/forum.html" class="nav-link">Форум</a></li>
-                <li><a href="pages/about.html" class="nav-link">О нас</a></li>
-                <li><a href="pages/auth.html" class="nav-link">Вход</a></li>
-            </ul>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span></span>
-                <span></span>
-                <span></span>
+    
+    <!-- Плавающая навигация-островок -->
+    <nav class="floating-nav" id="floatingNav">
+        <div class="nav-island">
+            <a href="index.html" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Главная</span>
+            </a>
+            <a href="pages/weather.html" class="nav-item">
+                <span class="nav-icon">🌤️</span>
+                <span class="nav-label">Погода</span>
+            </a>
+            <a href="pages/attractions.html" class="nav-item">
+                <span class="nav-icon">🗺️</span>
+                <span class="nav-label">Места</span>
+            </a>
+            <a href="pages/routes.html" class="nav-item">
+                <span class="nav-icon">🧭</span>
+                <span class="nav-label">Маршруты</span>
+            </a>
+            <a href="pages/planner.html" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">План</span>
+            </a>
+            <a href="pages/forum.html" class="nav-item">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Форум</span>
+            </a>
+            <a href="pages/about.html" class="nav-item">
+                <span class="nav-icon">ℹ️</span>
+                <span class="nav-label">О нас</span>
+            </a>
+            <a href="pages/auth.html" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Профиль</span>
+            </a>
+            
+            <!-- Переключатель темы в навигации -->
+            <button class="nav-item theme-toggle-btn" id="themeToggle">
+                <span class="nav-icon">🌙</span>
+                <span class="nav-label">Тема</span>
             </button>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
-    <!-- Основной контент -->
-    <main class="main-content">
-        <!-- Герой секция -->
-        <section class="hero">
-            <div class="hero-background"></div>
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    Планируйте<br>
-                    <span class="hero-title-accent">идеальное</span><br>
-                    путешествие
-                </h1>
-                <p class="hero-subtitle">
-                    Погода, достопримечательности, маршруты и планировщик в одном месте
-                </p>
-                <div class="hero-search">
-                    <input 
-                        type="text" 
-                        id="citySearch" 
-                        class="hero-search-input" 
-                        placeholder="Введите город..."
-                        autocomplete="off"
-                    >
-                    <button class="hero-search-btn" id="searchBtn">
-                        Начать планирование
-                    </button>
-                </div>
-                <div id="searchSuggestions" class="search-suggestions"></div>
+    <!-- Главный экран с картой -->
+    <section class="hero-map-section">
+        <!-- Фоновая карта -->
+        <div id="heroMap" class="hero-map"></div>
+        
+        <!-- Оверлей с градиентом -->
+        <div class="hero-overlay"></div>
+        
+        <!-- Контент поверх карты -->
+        <div class="hero-content">
+            <!-- Логотип -->
+            <div class="hero-logo">
+                <span class="logo-icon">🗺️</span>
+                <h1 class="logo-text">Maply</h1>
             </div>
-            <div class="hero-scroll-indicator">
-                <span>Прокрутите вниз</span>
-                <div class="scroll-line"></div>
+            
+            <!-- Заголовок -->
+            <h2 class="hero-title">
+                Исследуйте <span class="gradient-text" id="changingCity">Париж</span>
+            </h2>
+            
+            <!-- Подзаголовок -->
+            <p class="hero-subtitle">
+                Откройте для себя удивительные места по всему миру
+            </p>
+            
+            <!-- Поисковая строка -->
+            <div class="hero-search">
+                <input 
+                    type="text" 
+                    class="hero-search-input" 
+                    placeholder="Куда хотите отправиться?"
+                    id="heroSearchInput"
+                >
+                <button class="hero-search-btn" id="heroSearchBtn">
+                    <span>🔍</span>
+                    Искать
+                </button>
             </div>
-        </section>
-
-        <!-- Преимущества -->
-        <section class="features">
-            <div class="container">
-                <h2 class="section-title">Всё для вашего путешествия</h2>
-                <div class="features-grid">
-                    <div class="feature-card" data-feature="weather">
-                        <div class="feature-icon">🌤️</div>
-                        <h3 class="feature-title">Актуальная погода</h3>
-                        <p class="feature-description">
-                            Прогноз погоды на 5 дней для любого города мира
-                        </p>
-                        <a href="pages/weather.html" class="feature-link">Узнать погоду →</a>
-                    </div>
-                    
-                    <div class="feature-card" data-feature="attractions">
-                        <div class="feature-icon">🏛️</div>
-                        <h3 class="feature-title">Достопримечательности</h3>
-                        <p class="feature-description">
-                            Откройте для себя музеи, парки и культурные места
-                        </p>
-                        <a href="pages/attractions.html" class="feature-link">Исследовать →</a>
-                    </div>
-                    
-                    <div class="feature-card" data-feature="routes">
-                        <div class="feature-icon">🗺️</div>
-                        <h3 class="feature-title">Маршруты</h3>
-                        <p class="feature-description">
-                            Создавайте оптимальные маршруты между точками
-                        </p>
-                        <a href="pages/routes.html" class="feature-link">Построить маршрут →</a>
-                    </div>
-                    
-                    <div class="feature-card" data-feature="planner">
-                        <div class="feature-icon">📅</div>
-                        <h3 class="feature-title">Планировщик</h3>
-                        <p class="feature-description">
-                            Планируйте поездку по дням с сохранением прогресса
-                        </p>
-                        <a href="pages/planner.html" class="feature-link">Начать планирование →</a>
-                    </div>
-
-                    <div class="feature-card" data-feature="forum">
-                        <div class="feature-icon">💬</div>
-                        <h3 class="feature-title">Форум путешественников</h3>
-                        <p class="feature-description">
-                            Делитесь опытом и советами с другими туристами
-                        </p>
-                        <a href="pages/forum.html" class="feature-link">Перейти на форум →</a>
-                    </div>
-
-                    <div class="feature-card" data-feature="saved">
-                        <div class="feature-icon">⭐</div>
-                        <h3 class="feature-title">Сохранённые поездки</h3>
-                        <p class="feature-description">
-                            Все ваши планы хранятся локально и всегда доступны
-                        </p>
-                        <a href="pages/planner.html" class="feature-link">Мои поездки →</a>
-                    </div>
-                </div>
+            
+            <!-- Быстрые ссылки -->
+            <div class="quick-links">
+                <a href="pages/attractions.html" class="quick-link">
+                    <span class="quick-link-icon">🏛️</span>
+                    <span class="quick-link-text">Достопримечательности</span>
+                </a>
+                <a href="pages/weather.html" class="quick-link">
+                    <span class="quick-link-icon">🌤️</span>
+                    <span class="quick-link-text">Погода</span>
+                </a>
+                <a href="pages/routes.html" class="quick-link">
+                    <span class="quick-link-icon">🚶</span>
+                    <span class="quick-link-text">Маршруты</span>
+                </a>
+                <a href="pages/planner.html" class="quick-link">
+                    <span class="quick-link-icon">✈️</span>
+                    <span class="quick-link-text">Планировщик</span>
+                </a>
             </div>
-        </section>
-
-        <!-- Статистика -->
-        <section class="stats">
-            <div class="container">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-number" data-target="150">0</div>
-                        <div class="stat-label">Стран доступно</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" data-target="10000">0</div>
-                        <div class="stat-label">Достопримечательностей</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" data-target="500">0</div>
-                        <div class="stat-label">Городов в базе</div>
-                    </div>
-                </div>
+        </div>
+        
+        <!-- Индикатор прокрутки -->
+        <div class="scroll-indicator">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
             </div>
-        </section>
+            <span class="scroll-text">Прокрутите вниз</span>
+        </div>
+    </section>
 
-        <!-- Популярные направления -->
-        <section class="popular-destinations">
-            <div class="container">
+    <!-- Популярные направления -->
+    <section class="popular-section">
+        <div class="container">
+            <div class="section-header">
                 <h2 class="section-title">Популярные направления</h2>
-                <div class="destinations-grid" id="popularCities">
-                    <!-- Заполняется через JavaScript -->
+                <p class="section-subtitle">Самые посещаемые города мира</p>
+            </div>
+            
+            <div class="cities-grid" id="citiesGrid">
+                <!-- Будет заполнено через JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Возможности -->
+    <section class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Всё для вашего путешествия</h2>
+                <p class="section-subtitle">Инструменты для идеального отдыха</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3 class="feature-title">Интерактивные карты</h3>
+                    <p class="feature-text">Исследуйте города на детальных картах с маркерами достопримечательностей</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌤️</div>
+                    <h3 class="feature-title">Прогноз погоды</h3>
+                    <p class="feature-text">Актуальная погода и прогноз на 5 дней для любого города</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3 class="feature-title">Достопримечательности</h3>
+                    <p class="feature-text">Подробная информация, фото, координаты и маршруты к местам</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧭</div>
+                    <h3 class="feature-title">Построение маршрутов</h3>
+                    <p class="feature-text">Создавайте маршруты выбирая места прямо на карте</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3 class="feature-title">Планировщик поездок</h3>
+                    <p class="feature-text">Организуйте всё путешествие в одном месте</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3 class="feature-title">Сообщество</h3>
+                    <p class="feature-text">Делитесь опытом и находите вдохновение</p>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <!-- Подвал -->
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="logo">
-                        <span class="logo-icon">✈</span>
+                    <div class="footer-logo">
+                        <span class="logo-icon">🗺️</span>
                         <span class="logo-text">Maply</span>
                     </div>
-                    <p class="footer-description">
-                        Ваш надёжный помощник в планировании путешествий
-                    </p>
+                    <p class="footer-text">Ваш надёжный спутник в путешествиях по всему миру</p>
                 </div>
+                
                 <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Навигация</h4>
-                        <ul>
-                            <li><a href="index.html">Главная</a></li>
-                            <li><a href="pages/weather.html">Погода</a></li>
-                            <li><a href="pages/attractions.html">Места</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Планирование</h4>
-                        <ul>
-                            <li><a href="pages/routes.html">Маршруты</a></li>
-                            <li><a href="pages/planner.html">Планировщик</a></li>
-                            <li><a href="pages/forum.html">Форум</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Информация</h4>
-                        <ul>
-                            <li><a href="pages/about.html">О нас</a></li>
-                            <li><a href="pages/auth.html">Вход</a></li>
-                            <li><a href="#" id="langToggle">Language: RU</a></li>
-                        </ul>
-                    </div>
+                    <h4>Навигация</h4>
+                    <ul>
+                        <li><a href="pages/weather.html">Погода</a></li>
+                        <li><a href="pages/attractions.html">Места</a></li>
+                        <li><a href="pages/routes.html">Маршруты</a></li>
+                        <li><a href="pages/planner.html">Планировщик</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Информация</h4>
+                    <ul>
+                        <li><a href="pages/about.html">О проекте</a></li>
+                        <li><a href="pages/forum.html">Форум</a></li>
+                        <li><a href="pages/auth.html">Войти</a></li>
+                    </ul>
                 </div>
             </div>
+            
             <div class="footer-bottom">
-                <p>&copy; 2026 Maply. Итоговый проект по HTML/CSS/JavaScript</p>
+                <p>&copy; 2026 Maply. Создано с ❤️ для путешественников</p>
             </div>
         </div>
     </footer>
 
     <!-- Скрипты -->
-    <script src="js/storage.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="js/theme-new.js"></script>
+    <script src="js/index-new.js"></script>
 </body>
 </html>

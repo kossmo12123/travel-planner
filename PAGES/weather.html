@@ -4,154 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Погода - Maply</title>
-    <link rel="stylesheet" href="../css/style.css">
+    
+    <!-- Шрифты -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="../css/style-new.css">
 </head>
 <body>
-    <header class="header">
-        <nav class="nav-container">
-            <div class="logo">
-                <a href="../index.html">
-                    <span class="logo-icon">✈</span>
-                    <span class="logo-text">Maply</span>
-                </a>
-            </div>
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="../index.html" class="nav-link">Главная</a></li>
-                <li><a href="weather.html" class="nav-link active">Погода</a></li>
-                <li><a href="attractions.html" class="nav-link">Места</a></li>
-                <li><a href="routes.html" class="nav-link">Маршруты</a></li>
-                <li><a href="planner.html" class="nav-link">План</a></li>
-                <li><a href="forum.html" class="nav-link">Форум</a></li>
-                <li><a href="about.html" class="nav-link">О нас</a></li>
-                <li><a href="profile.html" class="nav-link">👤</a></li>
-                <li><a href="auth.html" class="nav-link">Вход</a></li>
-            </ul>
-            <button class="nav-toggle" id="navToggle">
-                <span></span>
-                <span></span>
-                <span></span>
+    
+    <!-- Плавающая навигация -->
+    <nav class="floating-nav" id="floatingNav">
+        <div class="nav-island">
+            <a href="../index.html" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Главная</span>
+            </a>
+            <a href="weather.html" class="nav-item active">
+                <span class="nav-icon">🌤️</span>
+                <span class="nav-label">Погода</span>
+            </a>
+            <a href="attractions.html" class="nav-item">
+                <span class="nav-icon">🗺️</span>
+                <span class="nav-label">Места</span>
+            </a>
+            <a href="routes.html" class="nav-item">
+                <span class="nav-icon">🧭</span>
+                <span class="nav-label">Маршруты</span>
+            </a>
+            <a href="planner.html" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">План</span>
+            </a>
+            <a href="forum.html" class="nav-item">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Форум</span>
+            </a>
+            <a href="about.html" class="nav-item">
+                <span class="nav-icon">ℹ️</span>
+                <span class="nav-label">О нас</span>
+            </a>
+            <a href="auth.html" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Профиль</span>
+            </a>
+            <button class="nav-item theme-toggle-btn" id="themeToggle">
+                <span class="nav-icon">🌙</span>
+                <span class="nav-label">Тема</span>
             </button>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
-    <main class="main-content weather-page">
+    <!-- Основной контент -->
+    <section class="page-section" style="padding-top: 8rem;">
         <div class="container">
-            <div class="page-header">
-                <h1 class="page-title">Прогноз погоды</h1>
-                <p class="page-subtitle">Узнайте погоду в любом городе мира</p>
+            <div class="section-header">
+                <h1 class="section-title">Прогноз погоды</h1>
+                <p class="section-subtitle">Актуальная погода для любого города мира</p>
             </div>
 
             <!-- Поиск города -->
-            <section class="search-section">
-                <div class="search-box">
-                    <input 
-                        type="text" 
-                        id="weatherCityInput" 
-                        class="search-input" 
-                        placeholder="Введите название города..."
-                        autocomplete="off"
-                    >
-                    <button class="search-button" id="weatherSearchBtn">
-                        🔍 Найти
-                    </button>
-                </div>
-                <div id="weatherSuggestions" class="search-suggestions"></div>
-            </section>
+            <div class="map-controls">
+                <input 
+                    type="text" 
+                    id="weatherCityInput" 
+                    class="map-search" 
+                    placeholder="Введите название города..."
+                >
+                <button id="weatherSearchBtn" class="map-btn">
+                    🔍 Найти погоду
+                </button>
+            </div>
+
+            <!-- Быстрые города -->
+            <div class="quick-cities" style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <button class="quick-city-btn map-btn map-btn-secondary" data-city="Алматы">🏔️ Алматы</button>
+                <button class="quick-city-btn map-btn map-btn-secondary" data-city="Москва">🏛️ Москва</button>
+                <button class="quick-city-btn map-btn map-btn-secondary" data-city="Париж">🗼 Париж</button>
+                <button class="quick-city-btn map-btn map-btn-secondary" data-city="Лондон">🎡 Лондон</button>
+                <button class="quick-city-btn map-btn map-btn-secondary" data-city="Токио">🗾 Токио</button>
+            </div>
 
             <!-- Загрузка -->
-            <div id="weatherLoading" class="loading-state" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p>Загружаем прогноз погоды...</p>
+            <div id="weatherLoading" style="display: none; text-align: center; padding: 3rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+                <p style="color: var(--text-secondary);">Загрузка данных...</p>
             </div>
 
             <!-- Ошибка -->
-            <div id="weatherError" class="error-state" style="display: none;">
-                <div class="error-icon">⚠️</div>
-                <p class="error-message"></p>
+            <div id="weatherError" style="display: none; padding: 2rem; background: rgba(244, 67, 54, 0.1); border-radius: var(--radius-lg); text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+                <p class="error-message" style="color: #f44336; font-weight: 600;"></p>
             </div>
 
             <!-- Текущая погода -->
-            <section id="currentWeather" class="current-weather" style="display: none;">
-                <div class="weather-card-main">
-                    <div class="weather-location">
-                        <h2 id="weatherCity"></h2>
-                        <p id="weatherDate"></p>
+            <div id="currentWeather" style="display: none;">
+                <div class="feature-card" style="text-align: center; padding: 3rem;">
+                    <h2 id="weatherCity" style="font-size: 2rem; margin-bottom: 0.5rem;"></h2>
+                    <p id="weatherDate" style="color: var(--text-secondary); margin-bottom: 2rem;"></p>
+                    
+                    <div id="weatherIcon" style="font-size: 6rem; margin-bottom: 1rem;"></div>
+                    <div style="font-size: 4rem; font-weight: 800; margin-bottom: 0.5rem;">
+                        <span id="currentTemp"></span>°C
                     </div>
-                    <div class="weather-main">
-                        <div class="weather-icon-large" id="weatherIcon"></div>
-                        <div class="weather-temp">
-                            <span class="temp-value" id="currentTemp"></span>
-                            <span class="temp-unit">°C</span>
+                    <p id="weatherDescription" style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 2rem; text-transform: capitalize;"></p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">Ощущается</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;" id="feelsLike"></div>
                         </div>
-                    </div>
-                    <div class="weather-description" id="weatherDescription"></div>
-                    <div class="weather-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Ощущается</span>
-                            <span class="detail-value" id="feelsLike"></span>
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">Влажность</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;" id="humidity"></div>
                         </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Влажность</span>
-                            <span class="detail-value" id="humidity"></span>
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">Ветер</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;" id="windSpeed"></div>
                         </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Ветер</span>
-                            <span class="detail-value" id="windSpeed"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Давление</span>
-                            <span class="detail-value" id="pressure"></span>
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">Давление</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;" id="pressure"></div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
             <!-- Прогноз на 5 дней -->
-            <section id="forecastSection" class="forecast-section" style="display: none;">
-                <h2 class="section-title">Прогноз на 5 дней</h2>
-                <div class="forecast-grid" id="forecastGrid">
-                    <!-- Заполняется JavaScript -->
-                </div>
-            </section>
-
-            <!-- Быстрый доступ к популярным городам -->
-            <section class="quick-cities">
-                <h3 class="section-subtitle">Популярные города</h3>
-                <div class="quick-cities-grid">
-                    <button class="quick-city-btn" data-city="Алматы">Алматы</button>
-                    <button class="quick-city-btn" data-city="Астана">Астана</button>
-                    <button class="quick-city-btn" data-city="Москва">Москва</button>
-                    <button class="quick-city-btn" data-city="Лондон">Лондон</button>
-                    <button class="quick-city-btn" data-city="Париж">Париж</button>
-                    <button class="quick-city-btn" data-city="Токио">Токио</button>
-                    <button class="quick-city-btn" data-city="Дубай">Дубай</button>
-                    <button class="quick-city-btn" data-city="Стамбул">Стамбул</button>
-                </div>
-            </section>
+            <div id="forecastSection" style="display: none; margin-top: 2rem;">
+                <h3 style="font-size: 2rem; margin-bottom: 1.5rem; text-align: center;">Прогноз на 5 дней</h3>
+                <div id="forecastGrid" class="features-grid"></div>
+            </div>
         </div>
-    </main>
+    </section>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="logo">
-                        <span class="logo-icon">✈</span>
+                    <div class="footer-logo">
+                        <span class="logo-icon">🗺️</span>
                         <span class="logo-text">Maply</span>
                     </div>
+                    <p class="footer-text">Ваш надёжный спутник в путешествиях</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <ul>
+                        <li><a href="weather.html">Погода</a></li>
+                        <li><a href="attractions.html">Места</a></li>
+                        <li><a href="routes.html">Маршруты</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Информация</h4>
+                    <ul>
+                        <li><a href="about.html">О нас</a></li>
+                        <li><a href="forum.html">Форум</a></li>
+                        <li><a href="auth.html">Войти</a></li>
+                    </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Maply. Powered by OpenWeatherMap API</p>
+                <p>&copy; 2026 Maply. Создано с ❤️</p>
             </div>
         </div>
     </footer>
 
-    <script src="../js/storage.js"></script>
+    <!-- Скрипты -->
     <script src="../js/api.js"></script>
+    <script src="../js/theme-new.js"></script>
+    <script src="../js/theme-OLD.js"></script>
     <script src="../js/weather.js"></script>
 </body>
 </html>
